@@ -1,8 +1,4 @@
 #!env python
-# testing git
-#testing here
-#testing xxxxx
-# testing here
 
 import logging
 import sys
