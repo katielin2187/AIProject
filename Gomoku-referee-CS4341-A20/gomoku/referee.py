@@ -56,8 +56,8 @@ class GomokuBoard(object):
         (x, y) = index
         return self._field[x][y]
 
-    def isFieldOpen(self, (x,y)):
-        return self._field[x][y].isEmpty
+    def isFieldOpen(self, *temp):
+        return self._field[temp[0]][temp[1]].isEmpty
 
     def placeToken(self, move):
         self.move_history.append(move)
@@ -70,10 +70,10 @@ class GomokuBoard(object):
         return board
     
     def printBoard(self, teams):
-        print ""
-        print "%s -- %s" % ('X', teams[0])
-        print "%s -- %s" % ('O', teams[1])
-        print ""
+        print ("")
+        print ("%s -- %s" % ('X', teams[0]))
+        print ("%s -- %s" % ('O', teams[1]))
+        print ("")
         sys.stdout.write("   ")
         for x in range(self.width):
             sys.stdout.write('%s ' % (chr(x+ord('A'))))
@@ -98,14 +98,17 @@ class GomokuBoard(object):
     def isFull(self):
         for x in range(self.width):
             for y in range(self.height):
-                if self.isFieldOpen( (x, y) ):
+                temp = (x, y)
+                if self.isFieldOpen( temp ):
                     return False
         return True
 
     def getEmptyFields(self):
-        return [[(x, y) for y in range(self.height)]
-                        for x in range(self.width)
-                            if self.isFieldOpen((x, y))]
+        for y in range(self.height):
+            for x in range(self.width):
+                temp = (x, y)
+                if self.isFieldOpen(temp):
+                    return temp
         
 
 class Move(object):
@@ -124,8 +127,9 @@ class Game(object):
         self.length_to_win = length_to_win
 
     def isMoveUnique(self, move):
-        logging.debug("unique: %s" % (self.board.isFieldOpen( (move.x, move.y) )))
-        return self.board.isFieldOpen( (move.x, move.y) )
+        temp = (move.x, move.y)
+        logging.debug("unique: %s" % (self.board.isFieldOpen( temp )))
+        return self.board.isFieldOpen( temp )
 
     def isMoveOnBoard(self, move):
         logging.debug("in x: %s" % ( 0 <= move.x and move.x < self.board.width ))
@@ -305,7 +309,7 @@ def waitForPlay(prev_mod_info, move_file_name="move_file"):
             break
         try:
             this_mod_info = os.stat(move_file_name).st_mtime
-        except WindowsError:
+        except OSError:
             pass
         time.sleep(0.05)
     time.sleep(0.10) # a little bit extra to allow for file writeout to occur)
@@ -400,8 +404,6 @@ def play_gomoku(team1, team2):
     for team in teams:
         writeTeamGoFile(team)
     pass
-
-
 
 
 if __name__ == "__main__":
