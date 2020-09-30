@@ -9,9 +9,10 @@ import copy
 import os.path
 from os import path
 
+
 move_file_name = "move_file"
 all_moves = []
-whatTurn=0
+whatTurn = 0
 
 '''
 pass in state of board and move history to help start the algorithm
@@ -25,15 +26,14 @@ def makeGameTree():
     print "all moves:"
     print(all_moves)
     #make board from previous moves
-
     if(all_moves[0] ==  '-1-1'):
         all_moves.remove('-1-1')
-        line = 'pandas.py H 8'
+        line = 'pandas1.py H 8'
     elif len(all_moves) == 1 and whatTurn == 0:
-        line = 'pandas.py H 8'
+        line = 'pandas1.py H 8'
     else:
         #calculate what move should be 
-        line = 'pandas.py B 1'
+        line = 'pandas1.py A 1'
 
     move = getMove(line)
     all_moves.append(move)
@@ -88,9 +88,9 @@ def getMove(line, move_file="move_file"):
     return move
 
 if __name__ == "__main__":
-    while not os.path.exists('pandas.py.go'):   
+    while not os.path.exists('pandas1.py.go'):   
         time.sleep(1)
-    if os.path.isfile('pandas.py.go'):  
+    if os.path.isfile('pandas1.py.go'):  
         if not path.exists('end_game'): 
             makeGameTree()
         if path.exists('end_game'):
