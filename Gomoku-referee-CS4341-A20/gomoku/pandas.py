@@ -13,34 +13,34 @@ move_file_name = "move_file"
 all_moves = []
 whatTurn=0
 
-'''
-pass in state of board and move history to help start the algorithm
-'''
+
 def makeGameTree():
-    '''
-    utility function needed to help algorithm determine which move is best 
-    '''
+    #get oponent's last move and add it to array of moves
     lastMove = readMoveFile()
     all_moves.append(lastMove)
+
     print "all moves:"
     print(all_moves)
     #make board from previous moves
 
-    if(all_moves[0] ==  '-1-1'):
-        all_moves.remove('-1-1')
+    #if first move choose middle of board
+    if(all_moves[0] ==  '-1 -1'):
+        all_moves.remove('-1 -1')
         line = 'pandas.py H 8'
-    elif len(all_moves) == 1 and whatTurn == 0:
+    elif len(all_moves) == 1 and whatTurn == 0: #if it's your first move but you're the second player
         line = 'pandas.py H 8'
     else:
         #calculate what move should be 
         line = 'pandas.py B 1'
 
+    #add move to array 
     move = getMove(line)
     all_moves.append(move)
 
     print "all moves 2:"
     print(all_moves)
 
+    #write move to file 
     writeMoveFile(line)
 
 '''
@@ -70,6 +70,7 @@ def readMoveFile(move_file="move_file", purge=True):
 
     return move
 
+#given a string, it will decipher into a move
 def getMove(line, move_file="move_file"):
     line_parts = line.split()
     try:
@@ -83,7 +84,7 @@ def getMove(line, move_file="move_file"):
         move_x = -1
         move_y = -1
 
-    move = str(move_x) + str(move_y)
+    move = str(move_x) + ' ' + str(move_y)
 
     return move
 
@@ -91,7 +92,7 @@ if __name__ == "__main__":
     while not os.path.exists('pandas.py.go'):   
         time.sleep(1)
     if os.path.isfile('pandas.py.go'):  
-        if not path.exists('end_game'): 
+        if not path.exists('end_game'): #team file exists and end game does not
             makeGameTree()
         if path.exists('end_game'):
             print("ending")
