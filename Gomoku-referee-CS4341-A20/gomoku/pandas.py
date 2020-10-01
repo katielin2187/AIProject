@@ -12,6 +12,7 @@ from os import path
 move_file_name = "move_file"
 
 def makeGameTree(whatTurn, all_moves):
+    team = 'pandas.py'
 
     #get oponent's last move and add it to array of moves
     #if len(all_moves) >= 3:
@@ -55,6 +56,7 @@ def makeGameTree(whatTurn, all_moves):
         board= []
         for i in range(15):
             for j in range(15):
+
                 move = 'pandas.py ' + str(i) + ' '+ str(j)
                 #print (move)
                 if move not in all_moves:
@@ -63,6 +65,9 @@ def makeGameTree(whatTurn, all_moves):
                     if board not in level:
                         level.append(board)
         #print(level)
+
+        #with level get the utlity value for each board in level
+        sendToUtlity(level, team)
 
         #randomly choosing which move for now
         #getting last board in the level and taking out the move to be added
@@ -168,6 +173,114 @@ def getMove(line, move_file="move_file"):
     #which using the parsed move and the team (X or O) will create a board for us
 
     return move
+
+def sendToUtlity(level, team):
+    for board in level:
+        utilityOfBoard = Utility(board, team)
+
+def Utility(board, team):
+    '''
+    winning => 10
+    blocking opponent's 5th => 9
+    making 4th connection => 8
+    blocking opponent's 4th => 7
+    making 3th connection => 6
+    blocking opponent's 3th => 5
+    making 2th connection => 4
+    making 1st connection => 3
+    blocking opponent's 2th => 2
+    blocking opponent's 1th => 1   don't need this, cannot block a move if they have nothing on the board
+    empty surrounding spaces => 1  checks diagonals
+    '''
+
+    winning =10
+    blocking5 = 9
+    making4 = 8
+    blocking4 = 7
+    making3 = 6
+    blocking3 = 5
+    making2 = 4
+    making1 = 3
+    blocking2 = 2
+    #blocking1 = 1
+    emptySpaces = 1
+
+    utilityVal = 0
+    nextPossibleMove= board[len(board)-1]
+    boardSoFar = [x for i, x in enumerate(board) if i !=len(board)-1]
+
+   
+    if Winning(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += winning
+    if callBlockingFive(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += blocking5   
+    if callMakingFour(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += making4
+    if callBlockingFour(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += blocking4   
+    if callMakingThree(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += making3  
+    if callBlockingThree(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += blocking3  
+    if callMakingTwo(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += making2
+
+    numOfTwo = callBlockingTwo(board,nextPossibleMove,boardSoFar, team,blocking2)
+    utilityVal += numOfTwo * blocking2 
+
+    if callMakingOne(board,nextPossibleMove,boardSoFar,team):
+        utilityVal += making1
+    if len(board) ==2: #if opponent erases your move, pick spot with most empty spaces
+        numOfEmpty = callEmptySpaces(board,nextPossibleMove,boardSoFar, team)
+        utilityVal += numOfEmpty
+
+    return utilityVal
+
+
+def Winning(board,nextPossibleMove,boardSoFar, team):
+    return True
+def callBlockingFive(board,nextPossibleMove,boardSoFar, team):
+    return True   
+def callMakingFour(board,nextPossibleMove,boardSoFar, team):
+    return True
+def callBlockingFour(board,nextPossibleMove,boardSoFar, team):
+    return True  
+def callMakingThree(board,nextPossibleMove,boardSoFar, team):
+    return True
+def callBlockingThree(board,nextPossibleMove,boardSoFar, team):
+    return True
+def callMakingTwo(board,nextPossibleMove,boardSoFar, team):
+    return True
+def callBlockingTwo(board,nextPossibleMove,boardSoFar, team, blocking2):
+    #take next possible move and compare it to 
+    surrMoves = getSurr(board,nextPossibleMove,boardSoFar, team, blocking2)
+    if len(surrMoves) == 0:
+        return 0
+    
+
+    return 0
+def callMakingOne(board,nextPossibleMove,boardSoFar, team):
+    #not sure if this will work
+    #check if team has had a move yet
+    if team in board:
+        #not first move
+        return False
+    else:
+        #first move
+        return True
+def callEmptySpaces(board,nextPossibleMove,boardSoFar, team):
+    return 0 
+
+def getSurr(board,nextPossibleMove,boardSoFar, team, blocking2):
+    #if your opponent surrounds your possible move, then append it to 
+    #the array and return surrounding moves
+    surroundingMoves = []
+
+    return surroundingMoves
+
+
+
+
 
 if __name__ == "__main__":
     while not os.path.exists('pandas.py.go'):   
