@@ -277,11 +277,30 @@ def getSurr(board,nextPossibleMove,boardSoFar, team):
     surroundingMoves = []
     '''
         go through every level in board and construct picture of opponent
-        give starting, ending, number of opponent, and if it is able to continue on either end (array of those locations)
-        also give starting, ending, number of own player and if it is able to continue on either end (array of those locations)
+        if opponent 
+            start counter/match board combos we hard code, if opponent has all [number ex: 3 areas in graph]
+            then give starting, ending, number of opponent in a row, and if it is able to continue on
+            either end (array of those locations)
+            return array of (startingPos, endingPos, number in a row, array of position next to starting or ending if available)
+            utilityFunction(array[2], len(positionArray))
+                this gets the utility based of off number in a row and if it has spaces on both sides
+                tuple = (utility,array)
+                totalUtilities.append(tuple)
+        if player
+            start counter and only look for own spots in graph dont worry about opponent because utlity will 
+            give what to do based off of returned info
+            also give starting, ending, number of own player in a row, and if 
+            it is able to continue on either end (array of those locations)
+            return tuple of (startingPos, endingPos, number in a row, array of position next to starting or ending if available)
+            utilityFunction(array[2], len(positionArray))
+                this gets the utility based of off number in a row and if it has spaces on both sides
+                tuple = (utility,array)
+                totalUtilities.append(tuple)
+        totalUtilities.sort() 
+            -- out of if statement to sort both and start depth limited with first move off of array
         if starting and ending of either player is the same -> thats 1
-        construct possible boards based off of these outcomes but alpha beta pruning while constructing tree(?)
-
+        construct possible boards based off of these first move of array but alpha beta pruning while
+        constructing tree(?)
         if can continue (either one)
             pass through utility function and determine what next move
             if utilityFunction
@@ -296,13 +315,7 @@ def getSurr(board,nextPossibleMove,boardSoFar, team):
         return next move 
     
     '''
-
-        
-
     return surroundingMoves
-
-
-
 
 
 if __name__ == "__main__":
