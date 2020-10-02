@@ -12,6 +12,7 @@ from os import path
 move_file_name = "move_file"
 
 def makeGameTree(whatTurn, all_moves):
+    team = 'pandas1.py'
 
     #get oponent's last move and add it to array of moves
     #if len(all_moves) >= 3:
@@ -51,24 +52,28 @@ def makeGameTree(whatTurn, all_moves):
         print("create game board")
         whatTurn +=2
         #create game board
-        level= []#will include the 15x15 options
-        board= []
-        for i in range(15):
-            for j in range(15):
-                move = 'pandas1.py ' + str(i) + ' '+ str(j)
-                #print (move)
-                if move not in all_moves:
-                    board = all_moves.copy()
-                    board.append(move)
-                    if board not in level:
-                        level.append(board)
+        # level= [] #will include the 15x15 options
+        # board= []
+        # for i in range(15):
+        #     for j in range(15):
+
+        #         move = 'pandas1.py ' + str(i) + ' '+ str(j)
+        #         #print (move)
+        #         if move not in all_moves:
+        #             board = all_moves.copy()
+        #             board.append(move)
+        #             if board not in level:
+        #                 level.append(board)
         #print(level)
+
+        #with level get the utlity value for each board in level
+        evalBoard(all_moves)
 
         #randomly choosing which move for now
         #getting last board in the level and taking out the move to be added
-        tempBoard = level[len(level)-1]
-        howManyTurnsSoFar = len(tempBoard)
-        line = tempBoard[howManyTurnsSoFar-1]
+        
+       
+        line = 'pandas1.py 6 7'
         line = getLetterNumberMove(line)
 
     #add move to array 
@@ -168,6 +173,154 @@ def getMove(line, move_file="move_file"):
     #which using the parsed move and the team (X or O) will create a board for us
 
     return move
+
+def Utility(board, team):
+    '''
+    winning => 10
+    blocking opponent's 5th => 9
+    making 4th connection => 8
+    blocking opponent's 4th => 7
+    making 3th connection => 6
+    blocking opponent's 3th => 5
+    making 2th connection => 4
+    making 1st connection => 3
+    blocking opponent's 2th => 2
+    blocking opponent's 1th => 1   don't need this, cannot block a move if they have nothing on the board
+    empty surrounding spaces => 1  checks diagonals
+    '''
+
+    winning =10
+    blocking5 = 9
+    making4 = 8
+    blocking4 = 7
+    making3 = 6
+    blocking3 = 5
+    making2 = 4
+    making1 = 3
+    blocking2 = 2
+    #blocking1 = 1
+    emptySpaces = 1
+
+    utilityVal = 0
+    nextPossibleMove= board[len(board)-1]
+    boardSoFar = [x for i, x in enumerate(board) if i !=len(board)-1]
+
+   
+    if Winning(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += winning
+    if callBlockingFive(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += blocking5   
+    if callMakingFour(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += making4
+    if callBlockingFour(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += blocking4   
+    if callMakingThree(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += making3  
+    if callBlockingThree(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += blocking3  
+    if callMakingTwo(board,nextPossibleMove,boardSoFar, team):
+        utilityVal += making2
+
+    numOfTwo = callBlockingTwo(board,nextPossibleMove,boardSoFar, team,blocking2)
+    utilityVal += numOfTwo * blocking2 
+
+    if callMakingOne(board,nextPossibleMove,boardSoFar,team):
+        utilityVal += making1
+    if len(board) ==2: #if opponent erases your move, pick spot with most empty spaces
+        numOfEmpty = callEmptySpaces(board,nextPossibleMove,boardSoFar, team)
+        utilityVal += numOfEmpty
+
+    return utilityVal
+
+
+def Winning(board,nextPossibleMove,boardSoFar, team):
+    return True
+def callBlockingFive(board,nextPossibleMove,boardSoFar, team):
+    return True   
+def callMakingFour(board,nextPossibleMove,boardSoFar, team):
+    return True
+def callBlockingFour(board,nextPossibleMove,boardSoFar, team):
+    return True  
+def callMakingThree(board,nextPossibleMove,boardSoFar, team):
+    return True
+def callBlockingThree(board,nextPossibleMove,boardSoFar, team):
+    return True
+def callMakingTwo(board,nextPossibleMove,boardSoFar, team):
+    return True
+def callBlockingTwo(board,nextPossibleMove,boardSoFar, team, blocking2):
+    #take next possible move and compare it to 
+    surrMoves = getSurr(board,nextPossibleMove,boardSoFar, team, blocking2)
+    if len(surrMoves) == 0:
+        return 0
+    
+
+    return 0
+def callMakingOne(board,nextPossibleMove,boardSoFar, team):
+    #not sure if this will work
+    #check if team has had a move yet
+    if team in board:
+        #not first move
+        return False
+    else:
+        #first move
+        return True
+def callEmptySpaces(board,nextPossibleMove,boardSoFar, team):
+    return 0 
+
+def evalBoard(board):
+    #if your opponent surrounds your possible move, then append it to 
+    #the array and return surrounding moves
+    positions = []
+    # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number in a row, array of empty that continues row]
+
+    for i in range(len(board) - 1):
+        position = [board[i][-3],board[i][-1]]
+        # [column, row]
+        print(position)
+        teamName = board[len(board) - 1]
+        if 'pandas1' in teamName:
+            ourTurn = False
+        else:
+            ourTurn = True
+
+        if 'pandas1' in board[i]:
+            ourTeam = True
+            pass
+        else:
+            pass
+    '''
+        go through every level in board and construct picture of opponent
+        if opponent 
+            start counter/match board combos we hard code, if opponent has all [number ex: 3 areas in graph]
+            then give starting, ending, number of opponent in a row, and if it is able to continue on
+            either end (array of those locations)
+            return array of (startingPos, endingPos, number in a row, array of position next to starting or ending if available)
+            utilityFunction(array[2], len(positionArray))
+                this gets the utility based of off number in a row and if it has spaces on both sides
+                tuple = (utility,array)
+                totalUtilities.append(tuple)
+        if player
+            start counter and only look for own spots in graph dont worry about opponent because utlity will 
+            give what to do based off of returned info
+            also give starting, ending, number of own player in a row, and if 
+            it is able to continue on either end (array of those locations)
+            return tuple of (startingPos, endingPos, number in a row, array of position next to starting or ending if available)
+            utilityFunction(array[2], len(positionArray))
+                this gets the utility based of off number in a row and if it has spaces on both sides
+                tuple = (utility,array)
+                totalUtilities.append(tuple)
+        totalUtilities.sort() 
+            -- outside of if statement to sort both and start depth limited with first move off of array
+        add own player to board based off of what was picked and opponents turn -- recursion from above again
+        if board full or limit of depth limited search
+            put board back to how it was and add second move from array of sorted utilites
+            recursion again from the top make it drop WAP
+        
+        return next move 
+    
+    '''
+    pass
+
 
 if __name__ == "__main__":
     while not os.path.exists('pandas1.py.go'):   

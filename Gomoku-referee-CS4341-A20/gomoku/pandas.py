@@ -52,28 +52,28 @@ def makeGameTree(whatTurn, all_moves):
         print("create game board")
         whatTurn +=2
         #create game board
-        level= []#will include the 15x15 options
-        board= []
-        for i in range(15):
-            for j in range(15):
+        # level= [] #will include the 15x15 options
+        # board= []
+        # for i in range(15):
+        #     for j in range(15):
 
-                move = 'pandas.py ' + str(i) + ' '+ str(j)
-                #print (move)
-                if move not in all_moves:
-                    board = all_moves.copy()
-                    board.append(move)
-                    if board not in level:
-                        level.append(board)
+        #         move = 'pandas.py ' + str(i) + ' '+ str(j)
+        #         #print (move)
+        #         if move not in all_moves:
+        #             board = all_moves.copy()
+        #             board.append(move)
+        #             if board not in level:
+        #                 level.append(board)
         #print(level)
 
         #with level get the utlity value for each board in level
-        sendToUtlity(level, team)
+        evalBoard(all_moves)
 
         #randomly choosing which move for now
         #getting last board in the level and taking out the move to be added
-        tempBoard = level[len(level)-1]
-        howManyTurnsSoFar = len(tempBoard)
-        line = tempBoard[howManyTurnsSoFar-1]
+        
+        
+        line = 'pandas.py 6 7'
         line = getLetterNumberMove(line)
 
     #add move to array 
@@ -174,10 +174,6 @@ def getMove(line, move_file="move_file"):
 
     return move
 
-def sendToUtlity(level, team):
-    for board in level:
-        utilityOfBoard = Utility(board, team)
-
 def Utility(board, team):
     '''
     winning => 10
@@ -271,10 +267,39 @@ def callMakingOne(board,nextPossibleMove,boardSoFar, team):
 def callEmptySpaces(board,nextPossibleMove,boardSoFar, team):
     return 0 
 
-def getSurr(board,nextPossibleMove,boardSoFar, team):
+def evalBoard(board):
     #if your opponent surrounds your possible move, then append it to 
     #the array and return surrounding moves
-    surroundingMoves = []
+    sendUtility = []
+    # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number in a row, array of empty that continues row]
+    ourMoves = []
+    opponentMoves = []
+    ourInvestigation = []
+    ourInvestigationCounter = 0
+    for i in range(len(board) - 1):
+        position = [board[i][-3],board[i][-1]]
+        # [column, row]
+        checkOurTurn = board[len(board) - 1]
+        if 'pandas' in checkOurTurn:
+            ourTurn = False
+        else:
+            ourTurn = True
+
+        if 'pandas' in board[i]:
+            ourTeam = True
+            ourMoves.append(position)
+        else:
+            ourTeam = False
+            opponentMoves.append(position)
+    for i in range(len(ourMoves) - 1): 
+        currentMove = ourMoves[i]
+        surroundings = getSurr(currentMove)
+        for j in surroundings:
+            if j is in ourMoves:
+                # get further investigations find where it is compared to currentMove
+                posRelative = checkPosition(currentMove, j)
+                
+        pass 
     '''
         go through every level in board and construct picture of opponent
         if opponent 
@@ -297,19 +322,68 @@ def getSurr(board,nextPossibleMove,boardSoFar, team):
                 tuple = (utility,array)
                 totalUtilities.append(tuple)
         totalUtilities.sort() 
-            -- out of if statement to sort both and start depth limited with first move off of array
+            -- outside of if statement to sort both and start depth limited with first move off of array
         add own player to board based off of what was picked and opponents turn -- recursion from above again
         if board full or limit of depth limited search
             put board back to how it was and add second move from array of sorted utilites
             recursion again from the top make it drop WAP
         
-
         return next move 
     
     '''
-    return surroundingMoves
+    pass
+def getPosition(currentMove, surrMove, counter = 2):
+    # returns endingPosition, number of in a row 
+    
+    currCol = int(currentMove[0])
+    currRow = int(currentMove[1])
+    surrCol = int(surrMove[0])
+    surrRow = int(surrMove[0])
+    # if top: surrRow - currRow < 0
+    # if bottom: surrRow - currRow > 0
+    # if left: surCol - currCol < 0 
+    # if right: surCol - currCol > 0 
+    # if top right: surCol - currCol > 0 and surRow - currRow < 0
+    # if top left: surCol - currCol < 0 and surRow - currRow < 0
+    # if bottom right: 
+    # if bottom left: 
 
-
+def getSurr(position):
+    surrounding = []
+    column = position[0]
+    row = position[1]
+    addCol = str(int(column) + 1)
+    subCol = str(int(column) - 1)
+    addRow = str(int(row) + 1)
+    subRow = str(int(row) - 1)
+    # if top right corner
+    if(column == '14' and row == '0'):
+        surrounding = [['13','0'],['13','1'], ['14','1']]
+    # if bottom right corner
+    elif(column == '14' and row == '14'):
+        surrounding = [['14','13'],['13','13'], ['13','14']]
+    # if top left corner 
+    elif(column == '0' and row == '0'):
+        surrounding = [['1','0'],['1','1'], ['0','1']]
+    # if bottom left corner
+    elif(column == '0' and row == '14'):
+        surrounding = [['0','13'],['1','13'], ['1','14']]
+    # if top 
+    elif(row == '0'):
+        surrounding = [[subCol,row],[addCol,row], [subCol,addRow], [column,addRow], [addCol,addRow]]]
+    # if bottom
+    elif(row == '14'):
+        surrounding = [[subCol,row], [subCol,subRow], [column, subRow], [addCol, subRow], [addCol, row]] 
+    # if left 
+    elif(column == '0'):
+        surrounding = [[col,subRow], [addCol,subRow], [addCol, row], [addCol, addRow], [column, addRow]]
+    # if right 
+    elif(column == '14'):
+        surrounding = [[col,subRow], [subCol,subRow], [subCol, row], [subCol, addRow], [column, addRow]]
+    else:
+        surrounding = [[col,subRow], [subCol,subRow], [subCol, row], [subCol, addRow], [column, addRow], [addCol, row], [addCol, addRow], [column, addRow]]
+    
+    return surrounding
 if __name__ == "__main__":
     while not os.path.exists('pandas.py.go'):   
         time.sleep(1)
