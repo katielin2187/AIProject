@@ -298,19 +298,11 @@ def getSurr(board,nextPossibleMove,boardSoFar, team):
                 totalUtilities.append(tuple)
         totalUtilities.sort() 
             -- out of if statement to sort both and start depth limited with first move off of array
-        if starting and ending of either player is the same -> thats 1
-        construct possible boards based off of these first move of array but alpha beta pruning while
-        constructing tree(?)
-        if can continue (either one)
-            pass through utility function and determine what next move
-            if utilityFunction
-                add to either starting or ending location based off of what is available in array
-            somekind of recursion action in here, making sure to add cost
-                loop through every potential next position, sorted by initial highest 
-                utility given with depth limited in mind
-            is board full?
-                totalCosts.append(str(moveLocation) + str(cost))
-            find lowest cost and choose that move
+        add own player to board based off of what was picked and opponents turn -- recursion from above again
+        if board full or limit of depth limited search
+            put board back to how it was and add second move from array of sorted utilites
+            recursion again from the top make it drop WAP
+        
 
         return next move 
     
