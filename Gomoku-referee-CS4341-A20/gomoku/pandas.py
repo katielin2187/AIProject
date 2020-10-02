@@ -271,10 +271,33 @@ def callMakingOne(board,nextPossibleMove,boardSoFar, team):
 def callEmptySpaces(board,nextPossibleMove,boardSoFar, team):
     return 0 
 
-def getSurr(board,nextPossibleMove,boardSoFar, team, blocking2):
+def getSurr(board,nextPossibleMove,boardSoFar, team):
     #if your opponent surrounds your possible move, then append it to 
     #the array and return surrounding moves
     surroundingMoves = []
+    '''
+        go through every level in board and construct picture of opponent
+        give starting, ending, number of opponent, and if it is able to continue on either end (array of those locations)
+        also give starting, ending, number of own player and if it is able to continue on either end (array of those locations)
+        if starting and ending of either player is the same -> thats 1
+        construct possible boards based off of these outcomes but alpha beta pruning while constructing tree(?)
+
+        if can continue (either one)
+            pass through utility function and determine what next move
+            if utilityFunction
+                add to either starting or ending location based off of what is available in array
+            somekind of recursion action in here, making sure to add cost
+                loop through every potential next position, sorted by initial highest 
+                utility given with depth limited in mind
+            is board full?
+                totalCosts.append(str(moveLocation) + str(cost))
+            find lowest cost and choose that move
+
+        return next move 
+    
+    '''
+
+        
 
     return surroundingMoves
 
