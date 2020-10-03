@@ -274,9 +274,9 @@ def evalBoard(board):
     # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number in a row, array of empty that continues row]
     ourMoves = []
     opponentMoves = []
-    ourTurn = ''
     currentArray = []
     emptySpaces = []
+    ourTurn = False
 
     checkOurTurn = board[len(board) - 1]
     if 'pandas' in checkOurTurn:
@@ -289,10 +289,8 @@ def evalBoard(board):
         # [column, row]
 
         if 'pandas' in board[i]:
-            ourTeam = True
             ourMoves.append(position)
         else:
-            ourTeam = False
             opponentMoves.append(position)
     for i in range(len(ourMoves) - 1): 
         currentMove = ourMoves[i]
@@ -300,13 +298,13 @@ def evalBoard(board):
         for j in surroundings:
             if j in ourMoves:
                 # get further investigations find where it is compared to currentMove
-                posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam)
+                posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam = True)
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
                 # in a row, array of empty that continues row]
                 endingPositon = posRelative[0]
                 numRow = posRelative[1]
                 emptySpaces = posRelative[2]
-                currentArray = [0, ourTeam, currentMove, endingPositon, numRow, emptySpaces] 
+                currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
                 sendUtility.append(currentArray)   
     for i in range(len(opponentMoves) - 1): 
         currentMove = ourMoves[i]
@@ -314,13 +312,13 @@ def evalBoard(board):
         for j in surroundings:
             if j in opponentMoves:
                 # get further investigations find where it is compared to currentMove
-                posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam)
+                posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam = False)
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
                 # in a row, array of empty that continues row]
                 endingPositon = posRelative[0]
                 numRow = posRelative[1]
                 emptySpaces = posRelative[2]
-                currentArray = [0, ourTeam, currentMove, endingPositon, numRow, emptySpaces] 
+                currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
                 sendUtility.append(currentArray)              
     return sendUtility 
     '''
