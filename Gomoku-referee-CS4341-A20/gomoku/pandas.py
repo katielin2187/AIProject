@@ -307,7 +307,21 @@ def evalBoard(board):
                 numRow = posRelative[1]
                 emptySpaces = posRelative[2]
                 currentArray = [0, ourTeam, currentMove, endingPositon, numRow, emptySpaces] 
-                sendUtility.append(currentArray)                
+                sendUtility.append(currentArray)   
+    for i in range(len(opponentMoves) - 1): 
+        currentMove = ourMoves[i]
+        surroundings = getSurr(opponentMoves, ourMoves)
+        for j in surroundings:
+            if j is in opponentMoves:
+                # get further investigations find where it is compared to currentMove
+                posRelative = checkPosition(currentMove, j, ourMoves, opponentMoves)
+                # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
+                # in a row, array of empty that continues row]
+                endingPositon = posRelative[0]
+                numRow = posRelative[1]
+                emptySpaces = posRelative[2]
+                currentArray = [0, ourTeam, currentMove, endingPositon, numRow, emptySpaces] 
+                sendUtility.append(currentArray)              
     return sendUtility 
     '''
         go through every level in board and construct picture of opponent
