@@ -139,7 +139,7 @@ def getLetterNumberMove(line):
         move_y = int(line_parts[2]) + 1 
     except IndexError:
         logging.debug("Problems with the move")
-        shutil.copyfile(move_file, "%s.bkup" % move_file)
+        shutil.copyfile(move_file_name, "%s.bkup" % move_file_name)
         team_name = None
         move_x = -1
         move_y = -1
@@ -249,9 +249,9 @@ def callMakingTwo(board,nextPossibleMove,boardSoFar, team):
     return True
 def callBlockingTwo(board,nextPossibleMove,boardSoFar, team, blocking2):
     #take next possible move and compare it to 
-    surrMoves = getSurr(board,nextPossibleMove,boardSoFar, team, blocking2)
-    if len(surrMoves) == 0:
-        return 0
+    # surrMoves = getSurr(board,nextPossibleMove,boardSoFar, team, blocking2)
+    # if len(surrMoves) == 0:
+    #    return 0
     
 
     return 0
@@ -296,11 +296,11 @@ def evalBoard(board):
             opponentMoves.append(position)
     for i in range(len(ourMoves) - 1): 
         currentMove = ourMoves[i]
-        surroundings = getSurr(currentMove, ourMoves)
+        surroundings = getSurr(currentMove)
         for j in surroundings:
-            if j is in ourMoves:
+            if j in ourMoves:
                 # get further investigations find where it is compared to currentMove
-                posRelative = checkPosition(currentMove, j, ourMoves, opponentMoves)
+                posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam)
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
                 # in a row, array of empty that continues row]
                 endingPositon = posRelative[0]
@@ -310,11 +310,11 @@ def evalBoard(board):
                 sendUtility.append(currentArray)   
     for i in range(len(opponentMoves) - 1): 
         currentMove = ourMoves[i]
-        surroundings = getSurr(opponentMoves, ourMoves)
+        surroundings = getSurr(currentMove)
         for j in surroundings:
-            if j is in opponentMoves:
+            if j in opponentMoves:
                 # get further investigations find where it is compared to currentMove
-                posRelative = checkPosition(currentMove, j, ourMoves, opponentMoves)
+                posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam)
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
                 # in a row, array of empty that continues row]
                 endingPositon = posRelative[0]
@@ -355,7 +355,7 @@ def evalBoard(board):
     
     '''
     pass
-def getPosition(currentMove, surrMove, ourMoves, opponentMoves, counter = 2, loop = True):
+def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = 2, loop = True):
     # returns endingPosition, number of in a row 
     
     currCol = int(currentMove[0])
@@ -364,46 +364,44 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, counter = 2, loo
     surrRow = int(surrMove[1])
     if counter == 2:
         startingMove = currentMove
-    beforeEmpty = ''
-    afterEmpty = ''
     while loop == True:
-        # if top right: surCol - currCol > 0 and surRow - currRow < 0
-        if surCol - currCol > 0 and surRow - currRow < 0:
+        # if top right: surrCol - currCol > 0 and surrRow - currRow < 0
+        if surrCol - currCol > 0 and surrRow - currRow < 0:
             # check empty bottom left if counter == 2
             if ((surrCol + 1 <= 14) and (surrRow - 1 >= 0)):
                 currentMove = surrMove
                 surrMove = [str(surrRow - 1), str(surrCol + 1)]
-                if surrMove in moves:
-                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
                 else:
                     loop = False
-        # if top left: surCol - currCol < 0 and surRow - currRow < 0
-        elif surCol - currCol < 0 and surRow - currRow < 0:
+        # if top left: surrCol - currCol < 0 and surrRow - currRow < 0
+        elif surrCol - currCol < 0 and surrRow - currRow < 0:
             # check empty bottom right
 
             if ((surrCol - 1 >= 0) and (surrRow - 1 >= 0)):
                 currentMove = surrMove
                 surrMove = [str(surrRow - 1), str(surrCol - 1)]
-                if surrMove in moves:
-                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
                 else:
                     loop = False
-        # if bottom left: surCol - currCol < 0 and surRow - currRow > 0
-        elif surCol - currCol < 0 and surRow - currRow > 0:
+        # if bottom left: surrCol - currCol < 0 and surrRow - currRow > 0
+        elif surrCol - currCol < 0 and surrRow - currRow > 0:
             if ((surrCol - 1 >= 0) and (surrRow + 1 <= 14)):
                 currentMove = surrMove
                 surrMove = [str(surrRow - 1), str(surrCol + 1)]
-                if surrMove in moves:
-                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
                 else:
                     loop = False
-        # if bottom right: surCol - currCol > 0 and surRow - currRow > 0
-        elif surCol - currCol > 0 and surRow - currRow > 0:
+        # if bottom right: surrCol - currCol > 0 and surrRow - currRow > 0
+        elif surrCol - currCol > 0 and surrRow - currRow > 0:
             if ((surrCol + 1 <= 14) and (surrRow + 1 <= 14)):
                 currentMove = surrMove
                 surrMove = [str(surrRow + 1), str(surrCol + 1)]
-                if surrMove in moves:
-                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
                 else:
                     loop = False
         # if top: surrRow - currRow < 0
@@ -411,8 +409,8 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, counter = 2, loo
             if surrRow - 1 >= 0:
                 currentMove = surrMove
                 surrMove = [str(surrRow - 1), str(surrCol)]
-                if surrMove in moves:
-                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
                 else:
                     loop = False
         # if bottom: surrRow - currRow > 0
@@ -420,26 +418,26 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, counter = 2, loo
             if surrRow + 1 <= 14:
                 currentMove = surrMove
                 surrMove = [str(surrRow + 1), str(surrCol)]
-                if surrMove in moves:
-                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
                 else:
                     loop = False
-        # if left: surCol - currCol < 0 
-        elif surCol - currCol < 0:
+        # if left: surrCol - currCol < 0 
+        elif surrCol - currCol < 0:
             if surrCol - 1 >= 0:
                 currentMove = surrMove
                 surrMove = [str(surrRow), str(surrCol - 1)]
-                if surrMove in moves:
-                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
                 else:
                     loop = False
-        # if right: surCol - currCol > 0 
+        # if right: surrCol - currCol > 0 
         elif surrCol - currCol > 0:
             if surrCol + 1 <= 14:
                 currentMove = surrMove
                 surrMove = [str(surrRow), str(surrCol + 1)]
-                if surrMove in moves:
-                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
                 else:
                     loop = False
     endingMove = currentMove
@@ -518,18 +516,18 @@ def getSurr(position):
         surrounding = [['0','13'],['1','13'], ['1','14']]
     # if top 
     elif(row == '0'):
-        surrounding = [[subCol,row],[addCol,row], [subCol,addRow], [column,addRow], [addCol,addRow]]]
+        surrounding = [[subCol,row],[addCol,row], [subCol,addRow], [column,addRow], [addCol,addRow]]
     # if bottom
     elif(row == '14'):
         surrounding = [[subCol,row], [subCol,subRow], [column, subRow], [addCol, subRow], [addCol, row]] 
     # if left 
     elif(column == '0'):
-        surrounding = [[col,subRow], [addCol,subRow], [addCol, row], [addCol, addRow], [column, addRow]]
+        surrounding = [[column,subRow], [addCol,subRow], [addCol, row], [addCol, addRow], [column, addRow]]
     # if right 
     elif(column == '14'):
-        surrounding = [[col,subRow], [subCol,subRow], [subCol, row], [subCol, addRow], [column, addRow]]
+        surrounding = [[column,subRow], [subCol,subRow], [subCol, row], [subCol, addRow], [column, addRow]]
     else:
-        surrounding = [[col,subRow], [subCol,subRow], [subCol, row], [subCol, addRow], [column, addRow], [addCol, row], [addCol, addRow], [column, addRow]]
+        surrounding = [[column,subRow], [subCol,subRow], [subCol, row], [subCol, addRow], [column, addRow], [addCol, row], [addCol, addRow], [column, addRow]]
     
     return surrounding
 if __name__ == "__main__":
