@@ -276,6 +276,7 @@ def evalBoard(board):
     opponentMoves = []
     ourTurn = ''
     currentArray = []
+    emptySpaces = []
 
     checkOurTurn = board[len(board) - 1]
     if 'pandas' in checkOurTurn:
@@ -304,10 +305,10 @@ def evalBoard(board):
                 # in a row, array of empty that continues row]
                 endingPositon = posRelative[0]
                 numRow = posRelative[1]
-                currentArray = [0, ourTeam, currentMove, endingPositon, numRow] 
-                # still need empty spaces               
-                
-        pass 
+                emptySpaces = posRelative[2]
+                currentArray = [0, ourTeam, currentMove, endingPositon, numRow, emptySpaces] 
+                sendUtility.append(currentArray)                
+    return sendUtility 
     '''
         go through every level in board and construct picture of opponent
         if opponent 
@@ -347,6 +348,8 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, counter = 2, loo
     currRow = int(currentMove[1])
     surrCol = int(surrMove[0])
     surrRow = int(surrMove[1])
+    if counter == 2:
+        startingMove = currentMove
     beforeEmpty = ''
     afterEmpty = ''
     while loop == True:
@@ -425,7 +428,59 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, counter = 2, loo
                     getPosition(currentMove, surrMove, moves, counter = counter + 1)
                 else:
                     loop = False
-    return [currentMove, counter]
+    endingMove = currentMove
+    emptySpaces = checkEmpties(startingMove, endingMove, ourMoves, opponentMoves)
+    return [endingMove, counter, emptySpaces]
+
+def checkEmpties(startingMove, endingMove, ourMoves, opponentMoves):
+# checks empty spaces around starting and ending moves
+    colStart = startingMove[0]
+    rowStart = startingMove[1]
+    colEnd = endingMove[0]
+    rowEnd = endingMove[1]
+    empty = []
+    # if rows are same then horizontal
+    if rowStart == rowEnd:
+        leftMove = min(int(colStart), int(colEnd))
+        rightMove = max(int(colStart), int(colEnd))
+        if leftMove - 1 >= 0:
+            emptyMove = [str(leftMove - 1), rowStart]
+            if emptyMove not in ourMoves and emptyMove not in opponentMoves:
+                empty.append(emptyMove)
+        if rightMove + 1 <= 14:
+            emptyMove = [str(leftMove + 1), rowStart]
+            if emptyMove not in ourMoves and emptyMove not in opponentMoves:
+                empty.append(emptyMove)
+    # if columns are same then vertical
+    elif colStart == colEnd:
+        bottomMove = max(int(rowStart), int(rowEnd))
+        topMove = min(int(rowStart), int(rowEnd))
+        if bottomMove + 1 <= 14:
+            emptyMove = [colStart, str(bottomMove + 1)]
+            if emptyMove not in ourMoves and emptyMove not in opponentMoves:
+                empty.append(emptyMove)
+        if rightMove - 1 >= 0:
+            emptyMove = [colStart, str(topMove - 1)]
+            if emptyMove not in ourMoves and emptyMove not in opponentMoves:
+                empty.append(emptyMove)
+    # else theyre diagonal
+    else:
+        bottomLeft = [min(int(colStart),int(colEnd)),max(int(rowEnd),int(rowStart))]
+        bottomLeftCol = bottomLeft[0]
+        bottomLeftRow = bottomLeft[1]
+        topRight = [max(int(colStart),int(colEnd)),min(int(rowEnd),int(rowStart))]
+        topRightCol = topRight[0]
+        topRightRow = topRight[1]
+        if bottomLeftCol - 1 >= 0 and bottomLeftRow + 1 <= 14:
+            emptyMove = [str(bottomLeftCol - 1), str(bottomLeftRow + 1)]
+            if emptyMove not in ourMoves and emptyMove not in opponentMoves:
+                empty.append(emptyMove)
+        if topRightCol + 1 <= 14 and topRightRow - 1 <= 0:
+            emptyMove = [str(topRightCol + 1), str(topRightRow - 1)]
+            if emptyMove not in ourMoves and emptyMove not in opponentMoves:
+                empty.append(emptyMove)
+    return empty
+
 
 def getSurr(position):
     surrounding = []
