@@ -274,16 +274,18 @@ def evalBoard(board):
     # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number in a row, array of empty that continues row]
     ourMoves = []
     opponentMoves = []
-    ourInvestigation = []
-    ourInvestigationCounter = 0
+    ourTurn = ''
+    currentArray = []
+
+    checkOurTurn = board[len(board) - 1]
+    if 'pandas' in checkOurTurn:
+        ourTurn = False
+    else:
+        ourTurn = True
+
     for i in range(len(board) - 1):
         position = [board[i][-3],board[i][-1]]
         # [column, row]
-        checkOurTurn = board[len(board) - 1]
-        if 'pandas' in checkOurTurn:
-            ourTurn = False
-        else:
-            ourTurn = True
 
         if 'pandas' in board[i]:
             ourTeam = True
@@ -293,11 +295,17 @@ def evalBoard(board):
             opponentMoves.append(position)
     for i in range(len(ourMoves) - 1): 
         currentMove = ourMoves[i]
-        surroundings = getSurr(currentMove)
+        surroundings = getSurr(currentMove, ourMoves)
         for j in surroundings:
             if j is in ourMoves:
                 # get further investigations find where it is compared to currentMove
-                posRelative = checkPosition(currentMove, j)
+                posRelative = checkPosition(currentMove, j, ourMoves, opponentMoves)
+                # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
+                # in a row, array of empty that continues row]
+                endingPositon = posRelative[0]
+                numRow = posRelative[1]
+                currentArray = [0, ourTeam, currentMove, endingPositon, numRow] 
+                # still need empty spaces               
                 
         pass 
     '''
@@ -332,21 +340,92 @@ def evalBoard(board):
     
     '''
     pass
-def getPosition(currentMove, surrMove, counter = 2):
+def getPosition(currentMove, surrMove, ourMoves, opponentMoves, counter = 2, loop = True):
     # returns endingPosition, number of in a row 
     
     currCol = int(currentMove[0])
     currRow = int(currentMove[1])
     surrCol = int(surrMove[0])
     surrRow = int(surrMove[0])
-    # if top: surrRow - currRow < 0
-    # if bottom: surrRow - currRow > 0
-    # if left: surCol - currCol < 0 
-    # if right: surCol - currCol > 0 
-    # if top right: surCol - currCol > 0 and surRow - currRow < 0
-    # if top left: surCol - currCol < 0 and surRow - currRow < 0
-    # if bottom right: 
-    # if bottom left: 
+    beforeEmpty = ''
+    afterEmpty = ''
+    while loop == True:
+        # if top right: surCol - currCol > 0 and surRow - currRow < 0
+        if surCol - currCol > 0 and surRow - currRow < 0:
+            # check empty bottom left if counter == 2
+            if ((surrCol + 1 <= 14) and (surrRow - 1 >= 0)):
+                currentMove = surrMove
+                surrMove = [str(surrRow - 1), str(surrCol + 1)]
+                if surrMove in moves:
+                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                else:
+                    loop = False
+        # if top left: surCol - currCol < 0 and surRow - currRow < 0
+        elif surCol - currCol < 0 and surRow - currRow < 0:
+            # check empty bottom right
+
+            if ((surrCol - 1 >= 0) and (surrRow - 1 >= 0)):
+                currentMove = surrMove
+                surrMove = [str(surrRow - 1), str(surrCol - 1)]
+                if surrMove in moves:
+                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                else:
+                    loop = False
+        # if bottom left: surCol - currCol < 0 and surRow - currRow > 0
+        elif surCol - currCol < 0 and surRow - currRow > 0:
+            if ((surrCol - 1 >= 0) and (surrRow + 1 <= 14)):
+                currentMove = surrMove
+                surrMove = [str(surrRow - 1), str(surrCol + 1)]
+                if surrMove in moves:
+                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                else:
+                    loop = False
+        # if bottom right: surCol - currCol > 0 and surRow - currRow > 0
+        elif surCol - currCol > 0 and surRow - currRow > 0:
+            if ((surrCol + 1 <= 14) and (surrRow + 1 <= 14)):
+                currentMove = surrMove
+                surrMove = [str(surrRow + 1), str(surrCol + 1)]
+                if surrMove in moves:
+                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                else:
+                    loop = False
+        # if top: surrRow - currRow < 0
+        elif surrRow - currRow < 0:
+            if surrRow - 1 >= 0:
+                currentMove = surrMove
+                surrMove = [str(surrRow - 1), str(surrCol)]
+                if surrMove in moves:
+                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                else:
+                    loop = False
+        # if bottom: surrRow - currRow > 0
+        elif surrRow - currRow > 0:
+            if surrRow + 1 <= 14:
+                currentMove = surrMove
+                surrMove = [str(surrRow + 1), str(surrCol)]
+                if surrMove in moves:
+                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                else:
+                    loop = False
+        # if left: surCol - currCol < 0 
+        elif surCol - currCol < 0:
+            if surrCol - 1 >= 0:
+                currentMove = surrMove
+                surrMove = [str(surrRow), str(surrCol - 1)]
+                if surrMove in moves:
+                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                else:
+                    loop = False
+        # if right: surCol - currCol > 0 
+        elif surrCol - currCol > 0:
+            if surrCol + 1 <= 14:
+                currentMove = surrMove
+                surrMove = [str(surrRow), str(surrCol + 1)]
+                if surrMove in moves:
+                    getPosition(currentMove, surrMove, moves, counter = counter + 1)
+                else:
+                    loop = False
+    return [currentMove, counter]
 
 def getSurr(position):
     surrounding = []
