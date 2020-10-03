@@ -252,9 +252,9 @@ def callBlockingTwo(board,nextPossibleMove,boardSoFar, team, blocking2):
     # surrMoves = getSurr(board,nextPossibleMove,boardSoFar, team, blocking2)
     # if len(surrMoves) == 0:
     #    return 0
+    return True
     
 
-    return 0
 def callMakingOne(board,nextPossibleMove,boardSoFar, team):
     #not sure if this will work
     #check if team has had a move yet

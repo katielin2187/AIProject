@@ -139,7 +139,7 @@ def getLetterNumberMove(line):
         move_y = int(line_parts[2]) + 1 
     except IndexError:
         logging.debug("Problems with the move")
-        shutil.copyfile(move_file, "%s.bkup" % move_file)
+        shutil.copyfile(move_file_name, "%s.bkup" % move_file_name)
         team_name = None
         move_x = -1
         move_y = -1
@@ -249,12 +249,12 @@ def callMakingTwo(board,nextPossibleMove,boardSoFar, team):
     return True
 def callBlockingTwo(board,nextPossibleMove,boardSoFar, team, blocking2):
     #take next possible move and compare it to 
-    surrMoves = getSurr(board,nextPossibleMove,boardSoFar, team, blocking2)
-    if len(surrMoves) == 0:
-        return 0
+    #surrMoves = getSurr(board,nextPossibleMove,boardSoFar, team, blocking2)
+    #if len(surrMoves) == 0:
+    #    return 0
+    return True
     
 
-    return 0
 def callMakingOne(board,nextPossibleMove,boardSoFar, team):
     #not sure if this will work
     #check if team has had a move yet
