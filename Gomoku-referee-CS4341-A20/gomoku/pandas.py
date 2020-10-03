@@ -276,7 +276,6 @@ def evalBoard(board):
     opponentMoves = []
     currentArray = []
     emptySpaces = []
-    ourTurn = False
 
     checkOurTurn = board[len(board) - 1]
     if 'pandas' in checkOurTurn:
@@ -321,6 +320,10 @@ def evalBoard(board):
                 currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
                 sendUtility.append(currentArray)              
     return sendUtility 
+    # send this to a utlity function which will return same array but with first value filled in 
+    # sort array by that value depending on whether or not it is our turn 
+    # add position to board that this function returns or make copy of a "fake" board and keep going 
+    # recursion until the end of the board or until depth limited
     '''
         go through every level in board and construct picture of opponent
         if opponent 
