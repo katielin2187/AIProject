@@ -346,7 +346,7 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, counter = 2, loo
     currCol = int(currentMove[0])
     currRow = int(currentMove[1])
     surrCol = int(surrMove[0])
-    surrRow = int(surrMove[0])
+    surrRow = int(surrMove[1])
     beforeEmpty = ''
     afterEmpty = ''
     while loop == True:
