@@ -276,6 +276,7 @@ def evalBoard(board):
     opponentMoves = []
     currentArray = []
     emptySpaces = []
+    emptyCounter = 0
 
     checkOurTurn = board[len(board) - 1]
     if 'pandas' in checkOurTurn:
@@ -294,8 +295,10 @@ def evalBoard(board):
     for i in range(len(ourMoves) - 1): 
         currentMove = ourMoves[i]
         surroundings = getSurr(currentMove)
+        currMoveBeginner = isBeginner(currentMove,j, board, ourMoves, opponentMoves, ourTurn)
+        # returns true if finds a beginner node
         for j in surroundings:
-            if j in ourMoves:
+            if j in ourMoves and currMoveBeginner:
                 # get further investigations find where it is compared to currentMove
                 posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam = True)
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
@@ -304,12 +307,22 @@ def evalBoard(board):
                 numRow = posRelative[1]
                 emptySpaces = posRelative[2]
                 currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
-                sendUtility.append(currentArray)   
+                sendUtility.append(currentArray) 
+            elif isEmpty(j, ourMoves, opponentMoves):
+                # when move is single and nothing surrounding
+                emptySpaces = checkEmptyBothSides(currentMove, j, ourMoves, opponentMoves)
+                currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
+                emptyCounter = emptyCounter + 1
+                # idk if we'll need counter yet
+                sendUtility.append(currentArray)
+        
     for i in range(len(opponentMoves) - 1): 
         currentMove = ourMoves[i]
         surroundings = getSurr(currentMove)
+        currMoveBeginner = isBeginner(currentMove,j, board, ourMoves, opponentMoves, ourTurn)
+        # returns true if finds a beginner node
         for j in surroundings:
-            if j in opponentMoves:
+            if j in opponentMoves and currMoveBeginner:
                 # get further investigations find where it is compared to currentMove
                 posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam = False)
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
@@ -318,7 +331,15 @@ def evalBoard(board):
                 numRow = posRelative[1]
                 emptySpaces = posRelative[2]
                 currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
-                sendUtility.append(currentArray)              
+                sendUtility.append(currentArray)
+            elif isEmpty(j, ourMoves, opponentMoves):
+                # when move is single and nothing surrounding
+                emptySpaces = checkEmptyBothSides(currentMove, j, ourMoves, opponentMoves)
+                currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
+                emptyCounter = emptyCounter + 1
+                # idk if we'll need counter yet
+                sendUtility.append(currentArray) 
+
     return sendUtility 
     # send this to a utlity function which will return same array but with first value filled in 
     # sort array by that value depending on whether or not it is our turn 
@@ -355,92 +376,288 @@ def evalBoard(board):
         return next move 
     
     '''
-    pass
-def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = 2, loop = True):
-    # returns endingPosition, number of in a row 
-    
+def checkEmptyBothSides(move, emptyMove, ourMoves, opponentMoves):
+    #checks if empty on both side
+    #return array of empties
+    currCol = int(move[0])
+    currRow = int(move[1])
+    empties = [emptyMove]
+    if whereSurrMove(move, emptyMove) == 'top right' and isEmpty([str(currCol - 1), str(currRow + 1)], ourMoves, opponentMoves) :
+        empties = [emptyMove, [str(currCol - 1), str(currRow + 1)]]
+    elif whereSurrMove(move, emptyMove) == 'top left' and isEmpty([str(currCol + 1), str(currRow + 1)], ourMoves, opponentMoves) :
+        empties = [emptyMove, [str(currCol + 1), str(currRow + 1)]]
+    elif whereSurrMove(move, emptyMove) == 'bottom left' and isEmpty([str(currCol + 1), str(currRow - 1)], ourMoves, opponentMoves) :
+        empties = [emptyMove, [str(currCol + 1), str(currRow - 1)]]
+    elif whereSurrMove(move, emptyMove) == 'bottom right' and isEmpty([str(currCol - 1), str(currRow - 1)], ourMoves, opponentMoves) :
+        empties = [emptyMove, [str(currCol - 1), str(currRow - 1)]]
+    elif whereSurrMove(move, emptyMove) == 'top' and isEmpty([str(currCol), str(currRow + 1)], ourMoves, opponentMoves) :
+        empties = [emptyMove, [str(currCol), str(currRow + 1)]]
+    elif whereSurrMove(move, emptyMove) == 'bottom' and isEmpty([str(currCol), str(currRow - 1)], ourMoves, opponentMoves) :
+        empties = [emptyMove, [str(currCol), str(currRow + 1)]]
+    elif whereSurrMove(move, emptyMove) == 'left' and isEmpty([str(currCol + 1), str(currRow)], ourMoves, opponentMoves) :
+        empties = [emptyMove, [str(currCol + 1), str(currRow)]]
+    elif whereSurrMove(move, emptyMove) == 'right' and isEmpty([str(currCol - 1), str(currRow)], ourMoves, opponentMoves) :
+        empties = [emptyMove, [str(currCol - 1), str(currRow)]]
+    return empties
+
+
+def whereSurrMove(currentMove, surrMove):
+
     currCol = int(currentMove[0])
     currRow = int(currentMove[1])
+    surrCol = int(surrMove[0])
+    surrRow = int(surrMove[1])
+    #where is surrounding move
+    location = ''
+    # if top right: surrCol - currCol > 0 and surrRow - currRow < 0
+    if surrCol - currCol > 0 and surrRow - currRow < 0:
+        # check empty bottom left if counter == 2
+        if ((surrCol + 1 <= 14) and (surrRow - 1 >= 0)):
+            location = 'top right'
+
+    # if top left: surrCol - currCol < 0 and surrRow - currRow < 0
+    elif surrCol - currCol < 0 and surrRow - currRow < 0:
+            # check empty bottom right
+        if ((surrCol - 1 >= 0) and (surrRow - 1 >= 0)):
+            location = 'top left'
+
+    # if bottom left: surrCol - currCol < 0 and surrRow - currRow > 0
+    elif surrCol - currCol < 0 and surrRow - currRow > 0:
+        if ((surrCol - 1 >= 0) and (surrRow + 1 <= 14)):
+            location = 'bottom left'
+
+    # if bottom right: surrCol - currCol > 0 and surrRow - currRow > 0
+    elif surrCol - currCol > 0 and surrRow - currRow > 0:
+        if ((surrCol + 1 <= 14) and (surrRow + 1 <= 14)):
+            location = 'bottom right'
+
+    # if top: surrRow - currRow < 0
+    elif surrRow - currRow < 0:
+        if surrRow - 1 >= 0:
+            location = 'top'
+
+    # if bottom: surrRow - currRow > 0
+    elif surrRow - currRow > 0:
+        if surrRow + 1 <= 14:
+            location = 'bottom'
+
+    # if left: surrCol - currCol < 0 
+    elif surrCol - currCol < 0:
+        if surrCol - 1 >= 0:
+            location = 'left'
+
+    # if right: surrCol - currCol > 0 
+    elif surrCol - currCol > 0:
+        if surrCol + 1 <= 14:
+            location = 'right'
+    else:
+        location = 'out of board'
+    return location
+
+def checkEdge(move):
+# check if is on outer edges of board
+    colMove = move[0]
+    rowMove = move[1]
+    edge = ''
+
+    # if top right corner
+    if(colMove == '14' and rowMove == '0'):
+        edge = 'top right'
+    # if bottom right corner
+    elif(colMove == '14' and rowMove == '14'):
+        edge = 'bottom right'
+    # if top left corner 
+    elif(colMove == '0' and rowMove == '0'):
+        edge = 'top left'
+    # if bottom left corner
+    elif(colMove == '0' and rowMove == '14'):
+        edge = 'bottom left'
+    # if top 
+    elif(rowMove == '0'):
+        edge = 'top right'
+    # if bottom
+    elif(rowMove == '14'):
+        edge = 'bottom'
+    # if left 
+    elif(colMove == '0'):
+        edge = 'left'
+    # if right 
+    elif(colMove == '14'):
+        edge = 'right'
+
+    return edge
+
+def isEmpty(move, ourMoves, opponentMoves):
+# return true if not in opponent or ourmoves
+    moveCol = int(move[0])
+    moveRow = int(move[1])
+    if ((move not in opponentMoves or move not in ourMoves) and moveCol >= 0 and moveCol <= 14 and moveRow <= 14 and moveRow >= 0):
+        return True
+    else:
+        return False
+
+def isBeginner(move, nextMove, board, ourMoves, opponentMoves, ourTeam):
+    # return true if the beginning move is empty before, is in a corner or has an opponent before
+    colStart = move[0]
+    rowStart = move[1]
+    colEnd = nextMove[0]
+    rowEnd = nextMove[1]
+    isAvailable = False
+    if ourTeam:
+        # if rows are same then horizontal
+        # check if start is most left and check conditions above
+        if rowStart == rowEnd:
+            if ( (checkEdge(move) == 'left') or (checkEdge(move) == 'right') ):
+                isAvailable = True
+            elif ( ([str(int(colStart - 1)),rowStart] in opponentMoves) or ([str(int(colStart + 1)),rowStart] in opponentMoves) ):
+                isAvailable = True
+            elif ( (isEmpty([str(int(colStart - 1)),rowStart], ourMoves, opponentMoves)) )or (isEmpty([str(int(colStart + 1)),rowStart], ourMoves, opponentMoves)):
+                isAvailable = True
+                # if on edge or opponent or empty   
+        # if columns are same then vertical
+        elif colStart == colEnd:
+            if ((checkEdge(move) == 'bottom') or (checkEdge(move) == 'top')):
+                isAvailable = True 
+            elif ( ([colStart,str(int(rowStart - 1))] in opponentMoves) or ([colStart,str(int(rowStart + 1))] in opponentMoves) ):
+                isAvailable = True
+            elif ( (isEmpty([colStart,str(int(rowStart - 1))], ourMoves, opponentMoves)) or (isEmpty([colStart,str(int(rowStart + 1))], ourMoves, opponentMoves))):
+                isAvailable = True
+        # if top right diag
+        elif ((int(colStart) > int(colEnd) and int(rowStart) < int(rowEnd)) or (int(colEnd) > int(colStart) and int(rowEnd) < int(rowStart))):
+            if ( (checkEdge(move) == 'top right') or (checkEdge(move) == 'bottom left') ):
+                    # if on edge or opponent or empty
+                return True
+            elif ( ([str(int(colStart + 1)), str(int(rowStart - 1))] in opponentMoves) or ([str(int(colStart - 1)), str(int(rowStart + 1))] in opponentMoves) ):
+                return True
+            elif ( isEmpty([str(int(colStart + 1)), str(int(rowStart - 1))], ourMoves, opponentMoves) or isEmpty([str(int(colStart - 1)), str(int(rowStart + 1))], ourMoves, opponentMoves) ):
+                return True
+        # if top left diag
+        elif ((int(colStart) < int(colEnd) and int(rowStart) > int(rowEnd)) or (int(colEnd) < int(colStart) and int(rowEnd) > int(rowStart))):
+            if ( (checkEdge(move) == 'top left') or (checkEdge(move) == 'bottom right') ):
+                    # if on edge or opponent or empty
+                return True
+            elif ( ([str(int(colStart - 1)), str(int(rowStart - 1))] in opponentMoves) or ([str(int(colStart + 1)), str(int(rowStart + 1))] in opponentMoves) ):
+                return True
+            elif ( isEmpty([str(int(colStart - 1)), str(int(rowStart - 1))], ourMoves, opponentMoves) or isEmpty([str(int(colStart + 1)), str(int(rowStart + 1))], ourMoves, opponentMoves) ):
+                return True
+          
+    elif not ourTeam:
+        if rowStart == rowEnd:
+            if ( (checkEdge(move) == 'left') or (checkEdge(move) == 'right') ):
+                isAvailable = True
+            elif ( ([str(int(colStart - 1)),rowStart] in ourMoves) or ([str(int(colStart + 1)),rowStart] in ourMoves) ):
+                isAvailable = True
+            elif ( (isEmpty([str(int(colStart - 1)),rowStart], ourMoves, opponentMoves)) )or (isEmpty([str(int(colStart + 1)),rowStart], ourMoves, opponentMoves)):
+                isAvailable = True
+                # if on edge or opponent or empty   
+        # if columns are same then vertical
+        elif colStart == colEnd:
+            if ((checkEdge(move) == 'bottom') or (checkEdge(move) == 'top')):
+                isAvailable = True 
+            elif ( ([colStart,str(int(rowStart - 1))] in ourMoves) or ([colStart,str(int(rowStart + 1))] in ourMoves) ):
+                isAvailable = True
+            elif ( (isEmpty([colStart,str(int(rowStart - 1))], ourMoves, opponentMoves)) or (isEmpty([colStart,str(int(rowStart + 1))], ourMoves, opponentMoves))):
+                isAvailable = True
+        # if top right diag
+        elif ((int(colStart) > int(colEnd) and int(rowStart) < int(rowEnd)) or (int(colEnd) > int(colStart) and int(rowEnd) < int(rowStart))):
+            if ( (checkEdge(move) == 'top right') or (checkEdge(move) == 'bottom left') ):
+                    # if on edge or opponent or empty
+                return True
+            elif ( ([str(int(colStart + 1)), str(int(rowStart - 1))] in ourMoves) or ([str(int(colStart - 1)), str(int(rowStart + 1))] in ourMoves) ):
+                return True
+            elif ( isEmpty([str(int(colStart + 1)), str(int(rowStart - 1))], ourMoves, opponentMoves) or isEmpty([str(int(colStart - 1)), str(int(rowStart + 1))], ourMoves, opponentMoves) ):
+                return True
+        # if top left diag
+        elif ((int(colStart) < int(colEnd) and int(rowStart) > int(rowEnd)) or (int(colEnd) < int(colStart) and int(rowEnd) > int(rowStart))):
+            if ( (checkEdge(move) == 'top left') or (checkEdge(move) == 'bottom right') ):
+                    # if on edge or opponent or empty
+                return True
+            elif ( ([str(int(colStart - 1)), str(int(rowStart - 1))] in ourMoves) or ([str(int(colStart + 1)), str(int(rowStart + 1))] in ourMoves) ):
+                return True
+            elif ( isEmpty([str(int(colStart - 1)), str(int(rowStart - 1))], ourMoves, opponentMoves) or isEmpty([str(int(colStart + 1)), str(int(rowStart + 1))], ourMoves, opponentMoves) ):
+                return True
+
+    return isAvailable
+
+def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = 2, loop = True):
+    # returns endingPosition, number of in a row 
     surrCol = int(surrMove[0])
     surrRow = int(surrMove[1])
     if counter == 2:
         startingMove = currentMove
     while loop == True:
         # if top right: surrCol - currCol > 0 and surrRow - currRow < 0
-        if surrCol - currCol > 0 and surrRow - currRow < 0:
+        if whereSurrMove(currentMove, surrMove) == 'top right':
             # check empty bottom left if counter == 2
-            if ((surrCol + 1 <= 14) and (surrRow - 1 >= 0)):
-                currentMove = surrMove
-                surrMove = [str(surrRow - 1), str(surrCol + 1)]
-                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
-                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
-                else:
-                    loop = False
-        # if top left: surrCol - currCol < 0 and surrRow - currRow < 0
-        elif surrCol - currCol < 0 and surrRow - currRow < 0:
-            # check empty bottom right
+            currentMove = surrMove
+            surrMove = [str(surrRow - 1), str(surrCol + 1)]
+            if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
+            else:
+                loop = False
 
-            if ((surrCol - 1 >= 0) and (surrRow - 1 >= 0)):
-                currentMove = surrMove
-                surrMove = [str(surrRow - 1), str(surrCol - 1)]
-                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
-                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
-                else:
-                    loop = False
-        # if bottom left: surrCol - currCol < 0 and surrRow - currRow > 0
-        elif surrCol - currCol < 0 and surrRow - currRow > 0:
-            if ((surrCol - 1 >= 0) and (surrRow + 1 <= 14)):
-                currentMove = surrMove
-                surrMove = [str(surrRow - 1), str(surrCol + 1)]
-                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
-                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
-                else:
-                    loop = False
-        # if bottom right: surrCol - currCol > 0 and surrRow - currRow > 0
-        elif surrCol - currCol > 0 and surrRow - currRow > 0:
-            if ((surrCol + 1 <= 14) and (surrRow + 1 <= 14)):
-                currentMove = surrMove
-                surrMove = [str(surrRow + 1), str(surrCol + 1)]
-                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
-                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
-                else:
-                    loop = False
+        # if top left: surrCol - currCol < 0 and surrRow - currRow < 0
+        elif whereSurrMove(currentMove, surrMove) == 'top left':
+            currentMove = surrMove
+            surrMove = [str(surrRow - 1), str(surrCol - 1)]
+            if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
+            else:
+                loop = False
+
+        # if bottom left: surrCol - currentMove < 0 and surrRow - currRow > 0
+        elif whereSurrMove(currentMove, surrMove) == 'bottom left':
+            currentMove = surrMove
+            surrMove = [str(surrRow - 1), str(surrCol + 1)]
+            if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
+            else:
+                loop = False
+
+        # if bottom right: surrCol - currentMove > 0 and surrRow - currRow > 0
+        elif whereSurrMove(currentMove, surrMove) == 'bottom right':
+            currentMove = surrMove
+            surrMove = [str(surrRow + 1), str(surrCol + 1)]
+            if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
+            else:
+                loop = False
+                
         # if top: surrRow - currRow < 0
-        elif surrRow - currRow < 0:
-            if surrRow - 1 >= 0:
-                currentMove = surrMove
-                surrMove = [str(surrRow - 1), str(surrCol)]
-                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
-                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
-                else:
-                    loop = False
+        elif whereSurrMove(currentMove, surrMove) == 'top':
+            currentMove = surrMove
+            surrMove = [str(surrRow - 1), str(surrCol)]
+            if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
+            else:
+                loop = False
+                
         # if bottom: surrRow - currRow > 0
-        elif surrRow - currRow > 0:
-            if surrRow + 1 <= 14:
-                currentMove = surrMove
-                surrMove = [str(surrRow + 1), str(surrCol)]
-                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
-                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
-                else:
-                    loop = False
+        elif whereSurrMove(currentMove, surrMove) == 'bottom':
+            currentMove = surrMove
+            surrMove = [str(surrRow + 1), str(surrCol)]
+            if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
+            else:
+                loop = False
+
         # if left: surrCol - currCol < 0 
-        elif surrCol - currCol < 0:
-            if surrCol - 1 >= 0:
-                currentMove = surrMove
-                surrMove = [str(surrRow), str(surrCol - 1)]
-                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
-                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
-                else:
-                    loop = False
+        elif whereSurrMove(currentMove, surrMove) == 'left':
+            currentMove = surrMove
+            surrMove = [str(surrRow), str(surrCol - 1)]
+            if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
+            else:
+                loop = False
+
         # if right: surrCol - currCol > 0 
-        elif surrCol - currCol > 0:
-            if surrCol + 1 <= 14:
-                currentMove = surrMove
-                surrMove = [str(surrRow), str(surrCol + 1)]
-                if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
-                    getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
-                else:
-                    loop = False
+        elif whereSurrMove(currentMove, surrMove) == 'right':
+            currentMove = surrMove
+            surrMove = [str(surrRow), str(surrCol + 1)]
+            if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
+                getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter = counter + 1)
+            else:
+                loop = False
     endingMove = currentMove
     emptySpaces = checkEmpties(startingMove, endingMove, ourMoves, opponentMoves)
     return [endingMove, counter, emptySpaces]
@@ -478,20 +695,39 @@ def checkEmpties(startingMove, endingMove, ourMoves, opponentMoves):
                 empty.append(emptyMove)
     # else theyre diagonal
     else:
-        bottomLeft = [min(int(colStart),int(colEnd)),max(int(rowEnd),int(rowStart))]
-        bottomLeftCol = bottomLeft[0]
-        bottomLeftRow = bottomLeft[1]
-        topRight = [max(int(colStart),int(colEnd)),min(int(rowEnd),int(rowStart))]
-        topRightCol = topRight[0]
-        topRightRow = topRight[1]
-        if bottomLeftCol - 1 >= 0 and bottomLeftRow + 1 <= 14:
-            emptyMove = [str(bottomLeftCol - 1), str(bottomLeftRow + 1)]
-            if emptyMove not in ourMoves and emptyMove not in opponentMoves:
-                empty.append(emptyMove)
-        if topRightCol + 1 <= 14 and topRightRow - 1 <= 0:
-            emptyMove = [str(topRightCol + 1), str(topRightRow - 1)]
-            if emptyMove not in ourMoves and emptyMove not in opponentMoves:
-                empty.append(emptyMove)
+        # if top right diag
+        if ((int(colStart) > int(colEnd) and int(rowStart) < int(rowEnd)) or (int(colEnd) > int(colStart) and int(rowEnd) < int(rowStart))):
+            bottomLeft = [min(int(colStart),int(colEnd)),max(int(rowEnd),int(rowStart))]
+            bottomLeftCol = bottomLeft[0]
+            bottomLeftRow = bottomLeft[1]
+            topRight = [max(int(colStart),int(colEnd)),min(int(rowEnd),int(rowStart))]
+            topRightCol = topRight[0]
+            topRightRow = topRight[1]
+            if bottomLeftCol - 1 >= 0 and bottomLeftRow + 1 <= 14:
+                emptyMove = [str(bottomLeftCol - 1), str(bottomLeftRow + 1)]
+                if emptyMove not in ourMoves and emptyMove not in opponentMoves:
+                    empty.append(emptyMove)
+            if topRightCol + 1 <= 14 and topRightRow - 1 <= 0:
+                emptyMove = [str(topRightCol + 1), str(topRightRow - 1)]
+                if emptyMove not in ourMoves and emptyMove not in opponentMoves:
+                    empty.append(emptyMove)
+        # if top left diag
+        if ((int(colStart) < int(colEnd) and int(rowStart) > int(rowEnd)) or (int(colEnd) < int(colStart) and int(rowEnd) > int(rowStart))):
+            bottomRight = [max(int(colStart),int(colEnd)),min(int(rowEnd),int(rowStart))]
+            bottomRightCol = bottomRight[0]
+            bottomRightRow = bottomRight[1]
+            topLeft = [min(int(colStart),int(colEnd)),max(int(rowEnd),int(rowStart))]
+            topLeftCol = topLeft[0]
+            topLeftRow = topLeft[1]
+            if bottomRightCol + 1 <= 14 and bottomRightRow + 1 <= 14:
+                emptyMove = [str(bottomRightCol + 1), str(bottomRightRow + 1)]
+                if emptyMove not in ourMoves and emptyMove not in opponentMoves:
+                    empty.append(emptyMove)
+            if topLeftCol - 1 >= 0 and topLeftRow - 1 >= 0:
+                emptyMove = [str(topRightCol - 1), str(topRightRow - 1)]
+                if emptyMove not in ourMoves and emptyMove not in opponentMoves:
+                    empty.append(emptyMove)
+
     return empty
 
 
