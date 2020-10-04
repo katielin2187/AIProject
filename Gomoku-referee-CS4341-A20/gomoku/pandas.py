@@ -308,7 +308,7 @@ def evalBoard(board):
                 emptySpaces = posRelative[2]
                 currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
                 sendUtility.append(currentArray) 
-            elif isEmpty(j, ourMoves, opponentMoves):
+            elif isEmpty(j, ourMoves, opponentMoves) and currMoveBeginner:
                 # when move is single and nothing surrounding
                 emptySpaces = checkEmptyBothSides(currentMove, j, ourMoves, opponentMoves)
                 currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
@@ -332,7 +332,7 @@ def evalBoard(board):
                 emptySpaces = posRelative[2]
                 currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
                 sendUtility.append(currentArray)
-            elif isEmpty(j, ourMoves, opponentMoves):
+            elif isEmpty(j, ourMoves, opponentMoves) and currMoveBeginner:
                 # when move is single and nothing surrounding
                 emptySpaces = checkEmptyBothSides(currentMove, j, ourMoves, opponentMoves)
                 currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
