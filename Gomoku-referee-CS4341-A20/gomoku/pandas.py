@@ -174,7 +174,10 @@ def getMove(line, move_file="move_file"):
 
     return move
 
-def Utility(board, team):
+def sendUtility(ourMoves, oppMoves, ourTurn):
+    # if our turn is true : opptimality is ours
+    # else optimality other team
+                   
     '''
     winning => 10
     blocking opponent's 5th => 9
@@ -188,89 +191,123 @@ def Utility(board, team):
     blocking opponent's 1th => 1   don't need this, cannot block a move if they have nothing on the board
     empty surrounding spaces => 1  checks diagonals
     '''
-
-    winning =10
+    winning = 10
     blocking5 = 9
     making4 = 8
     blocking4 = 7
     making3 = 6
     blocking3 = 5
     making2 = 4
-    making1 = 3
     blocking2 = 2
-    #blocking1 = 1
-    emptySpaces = 1
+    empties = []
 
-    utilityVal = 0
-    nextPossibleMove= board[len(board)-1]
-    boardSoFar = [x for i, x in enumerate(board) if i !=len(board)-1]
+    moveUtility = []
 
-   
-    if Winning(board,nextPossibleMove,boardSoFar, team):
-        utilityVal += winning
-    if callBlockingFive(board,nextPossibleMove,boardSoFar, team):
-        utilityVal += blocking5   
-    if callMakingFour(board,nextPossibleMove,boardSoFar, team):
-        utilityVal += making4
-    if callBlockingFour(board,nextPossibleMove,boardSoFar, team):
-        utilityVal += blocking4   
-    if callMakingThree(board,nextPossibleMove,boardSoFar, team):
-        utilityVal += making3  
-    if callBlockingThree(board,nextPossibleMove,boardSoFar, team):
-        utilityVal += blocking3  
-    if callMakingTwo(board,nextPossibleMove,boardSoFar, team):
-        utilityVal += making2
-
-    numOfTwo = callBlockingTwo(board,nextPossibleMove,boardSoFar, team,blocking2)
-    utilityVal += numOfTwo * blocking2 
-
-    if callMakingOne(board,nextPossibleMove,boardSoFar,team):
-        utilityVal += making1
-    if len(board) ==2: #if opponent erases your move, pick spot with most empty spaces
-        numOfEmpty = callEmptySpaces(board,nextPossibleMove,boardSoFar, team)
-        utilityVal += numOfEmpty
-
-    return utilityVal
-
-
-def Winning(board,nextPossibleMove,boardSoFar, team):
-    return True
-def callBlockingFive(board,nextPossibleMove,boardSoFar, team):
-    return True   
-def callMakingFour(board,nextPossibleMove,boardSoFar, team):
-    return True
-def callBlockingFour(board,nextPossibleMove,boardSoFar, team):
-    return True  
-def callMakingThree(board,nextPossibleMove,boardSoFar, team):
-    return True
-def callBlockingThree(board,nextPossibleMove,boardSoFar, team):
-    return True
-def callMakingTwo(board,nextPossibleMove,boardSoFar, team):
-    return True
-def callBlockingTwo(board,nextPossibleMove,boardSoFar, team, blocking2):
-    #take next possible move and compare it to 
-    # surrMoves = getSurr(board,nextPossibleMove,boardSoFar, team, blocking2)
-    # if len(surrMoves) == 0:
-    #    return 0
-    return True
+    moves = []
+    opponent = []
     
-
-def callMakingOne(board,nextPossibleMove,boardSoFar, team):
-    #not sure if this will work
-    #check if team has had a move yet
-    if team in board:
-        #not first move
-        return False
+    if ourTurn:
+        if len(ourMoves) == 0:
+            moves = 0
+            oppMoves = oppMoves
+        else:
+            moves = ourMoves
+            opponent = oppMoves
     else:
-        #first move
-        return True
-def callEmptySpaces(board,nextPossibleMove,boardSoFar, team):
-    return 0 
+        moves = oppMoves
+        opponent = ourMoves
+
+    if moves != 0:
+        for move in moves:
+            numRow = move[4]
+            empties = move[5]
+            print("number of moves in a row: ")
+            print(numRow)
+            for empty in empties:
+                print("these are empty locations: ")
+                print(empty)
+                utility = 0
+                if numRow == 4:
+                    utility += winning
+                elif numRow == 3:
+                    utlitiy += making4
+                elif numRow == 2:
+                    utlitiy += making3
+                elif numRow == 1:
+                    utlitiy += making2
+
+                for oppMove in opponent:
+                    if empty in oppMove[5]:
+                        oppNumRow = oppMove[4]
+                        if oppNumRow == 4:
+                            utility += blocking5
+                        elif oppNumRow == 3:
+                            utlitiy += blocking4
+                        elif oppNumRow == 2:
+                            utlitiy += blocking3
+                        elif oppNumRow == 1:
+                            utlitiy += blocking2
+                        opponent[opponent.indexof(oppMove[5])].remove(empty)
+
+                temp = [move, utility]
+                moveUtility.append(temp)
+    for opp in opponent:
+        numRow = opp[4]
+        empties = opp[5]
+        print("number of moves in a row: ")
+        print(numRow)
+        for empty in empties:
+            print("these are empty locations: ")
+            print(empty)
+            utility = 0
+            if numRow == 4:
+                utility += blocking5
+            elif numRow == 3:
+                utlitiy += blocking4
+            elif numRow == 2:
+                utlitiy += blocking3
+            elif numRow == 1:
+                utlitiy += blocking2
+            temp = [move, utility]
+            moveUtility.append(temp)
+    return moveUtility
 
 def evalBoard(board):
+    '''
+        go through every level in board and construct picture of opponent
+        if opponent 
+            start counter/match board combos we hard code, if opponent has all [number ex: 3 areas in graph]
+            then give starting, ending, number of opponent in a row, and if it is able to continue on
+            either end (array of those locations)
+            return array of (startingPos, endingPos, number in a row, array of position next to starting or ending if available)
+            utilityFunction(array[2], len(positionArray))
+                this gets the utility based of off number in a row and if it has spaces on both sides
+                tuple = (utility,array)
+                totalUtilities.append(tuple)
+        if player
+            start counter and only look for own spots in graph dont worry about opponent because utlity will 
+            give what to do based off of returned info
+            also give starting, ending, number of own player in a row, and if 
+            it is able to continue on either end (array of those locations)
+            return tuple of (startingPos, endingPos, number in a row, array of position next to starting or ending if available)
+            utilityFunction(array[2], len(positionArray))
+                this gets the utility based of off number in a row and if it has spaces on both sides
+                tuple = (utility,array)
+                totalUtilities.append(tuple)
+        totalUtilities.sort() 
+            -- outside of if statement to sort both and start depth limited with first move off of array
+        add own player to board based off of what was picked and opponents turn -- recursion from above again
+        if board full or limit of depth limited search
+            put board back to how it was and add second move from array of sorted utilites
+            recursion again from the top make it drop WAP
+        
+        return next move 
+    '''
+
     #if your opponent surrounds your possible move, then append it to 
     #the array and return surrounding moves
-    sendUtility = []
+    sendUtilityOur = []
+    sendUtilityOpponent = []
     # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number in a row, array of empty that continues row]
     ourMoves = []
     opponentMoves = []
@@ -307,14 +344,14 @@ def evalBoard(board):
                 numRow = posRelative[1]
                 emptySpaces = posRelative[2]
                 currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
-                sendUtility.append(currentArray) 
+                sendUtilityOur.append(currentArray) 
             elif isEmpty(j, ourMoves, opponentMoves) and currMoveBeginner:
                 # when move is single and nothing surrounding
                 emptySpaces = checkEmptyBothSides(currentMove, j, ourMoves, opponentMoves)
                 currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
                 emptyCounter = emptyCounter + 1
                 # idk if we'll need counter yet
-                sendUtility.append(currentArray)
+                sendUtilityOur.append(currentArray)
         
     for i in range(len(opponentMoves) - 1): 
         currentMove = ourMoves[i]
@@ -331,54 +368,25 @@ def evalBoard(board):
                 numRow = posRelative[1]
                 emptySpaces = posRelative[2]
                 currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
-                sendUtility.append(currentArray)
+                sendUtilityOpponent.append(currentArray)
             elif isEmpty(j, ourMoves, opponentMoves) and currMoveBeginner:
                 # when move is single and nothing surrounding
                 emptySpaces = checkEmptyBothSides(currentMove, j, ourMoves, opponentMoves)
                 currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
                 emptyCounter = emptyCounter + 1
                 # idk if we'll need counter yet
-                sendUtility.append(currentArray) 
+                sendUtilityOpponent.append(currentArray) 
 
-    return sendUtility 
+    return sendUtility(sendUtilityOur, sendUtilityOpponent, ourTurn)
     # send this to a utlity function which will return same array but with first value filled in 
     # sort array by that value depending on whether or not it is our turn 
     # add position to board that this function returns or make copy of a "fake" board and keep going 
     # recursion until the end of the board or until depth limited
-    '''
-        go through every level in board and construct picture of opponent
-        if opponent 
-            start counter/match board combos we hard code, if opponent has all [number ex: 3 areas in graph]
-            then give starting, ending, number of opponent in a row, and if it is able to continue on
-            either end (array of those locations)
-            return array of (startingPos, endingPos, number in a row, array of position next to starting or ending if available)
-            utilityFunction(array[2], len(positionArray))
-                this gets the utility based of off number in a row and if it has spaces on both sides
-                tuple = (utility,array)
-                totalUtilities.append(tuple)
-        if player
-            start counter and only look for own spots in graph dont worry about opponent because utlity will 
-            give what to do based off of returned info
-            also give starting, ending, number of own player in a row, and if 
-            it is able to continue on either end (array of those locations)
-            return tuple of (startingPos, endingPos, number in a row, array of position next to starting or ending if available)
-            utilityFunction(array[2], len(positionArray))
-                this gets the utility based of off number in a row and if it has spaces on both sides
-                tuple = (utility,array)
-                totalUtilities.append(tuple)
-        totalUtilities.sort() 
-            -- outside of if statement to sort both and start depth limited with first move off of array
-        add own player to board based off of what was picked and opponents turn -- recursion from above again
-        if board full or limit of depth limited search
-            put board back to how it was and add second move from array of sorted utilites
-            recursion again from the top make it drop WAP
-        
-        return next move 
-    
-    '''
+
+
 def checkEmptyBothSides(move, emptyMove, ourMoves, opponentMoves):
-    #checks if empty on both side
-    #return array of empties
+    #checks if empty on both side of sigle move
+    #return array of empties 
     currCol = int(move[0])
     currRow = int(move[1])
     empties = [emptyMove]
@@ -778,4 +786,3 @@ if __name__ == "__main__":
         if path.exists('end_game'):
             print("ending")
             sys.exit()
-
