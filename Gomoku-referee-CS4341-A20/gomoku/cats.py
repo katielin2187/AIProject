@@ -12,7 +12,7 @@ from os import path
 move_file_name = "move_file"
 
 def makeGameTree(whatTurn, all_moves):
-    team = 'pandas.py'
+    team = 'cats.py'
 
     #get oponent's last move and add it to array of moves
     #if len(all_moves) >= 3:
@@ -37,11 +37,11 @@ def makeGameTree(whatTurn, all_moves):
     #if first move choose middle of board
     if(all_moves[0]=='None -1 -1'):
         all_moves.pop()
-        line = 'pandas.py H 8'
+        line = 'cats.py H 8'
         whatTurn += 2
     elif len(all_moves) == 1 and whatTurn == 0: #if it's your first move but you're the second player
         print("overwriting first play")
-        line = 'pandas.py H 8'
+        line = 'cats.py H 8'
 
         #print(all_moves[0][-3:])
 
@@ -57,7 +57,7 @@ def makeGameTree(whatTurn, all_moves):
         # for i in range(15):
         #     for j in range(15):
 
-        #         move = 'pandas.py ' + str(i) + ' '+ str(j)
+        #         move = 'cats.py ' + str(i) + ' '+ str(j)
         #         #print (move)
         #         if move not in all_moves:
         #             board = all_moves.copy()
@@ -73,7 +73,7 @@ def makeGameTree(whatTurn, all_moves):
         #getting last board in the level and taking out the move to be added
         
         
-        line = 'pandas.py 6 7'
+        line = 'cats.py 6 7'
         line = getLetterNumberMove(line)
 
     #add move to array 
@@ -88,9 +88,9 @@ def makeGameTree(whatTurn, all_moves):
 
     if __name__ == "__main__":
         removeTeamGoFile()
-        while not os.path.exists('pandas.py.go'):   
+        while not os.path.exists('cats.py.go'):   
             time.sleep(1)
-        if os.path.isfile('pandas.py.go'):  
+        if os.path.isfile('cats.py.go'):  
             if not path.exists('end_game'): #team file exists and end game does not
                 makeGameTree(whatTurn, all_moves)
             if path.exists('end_game'):
@@ -104,7 +104,7 @@ utility function is the higher the options left the lower the cost
 '''
 
 def removeTeamGoFile():
-    team_go_file = 'pandas.py.go'
+    team_go_file = 'cats.py.go'
     try:
         os.remove(team_go_file)
     except OSError:
@@ -334,7 +334,7 @@ def evalBoard(board):
     emptyCounter = 0
 
     checkOurTurn = board[len(board) - 1]
-    if 'pandas' in checkOurTurn:
+    if 'cats' in checkOurTurn:
         ourTurn = False
     else:
         ourTurn = True
@@ -346,7 +346,7 @@ def evalBoard(board):
         print("position is: " + str(position))
 
         #add the position to our array or oponents array depending on whos move it is
-        if 'pandas' in board[i]:
+        if 'cats' in board[i]:
             ourMoves.append(position)
         else:
             opponentMoves.append(position)
@@ -834,9 +834,9 @@ def getSurr(position):
 
 
 if __name__ == "__main__":
-    while not os.path.exists('pandas.py.go'):   
+    while not os.path.exists('cats.py.go'):   
         time.sleep(1)
-    if os.path.isfile('pandas.py.go'):  
+    if os.path.isfile('cats.py.go'):  
         if not path.exists('end_game'): #team file exists and end game does not
             whatTurn = 0
             all_moves = []
