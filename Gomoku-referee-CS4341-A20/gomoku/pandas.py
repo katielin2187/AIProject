@@ -421,6 +421,7 @@ def evalBoard(board):
 
             if j in ourMoves and currMoveBeginner:
                 # get further investigations find where it is compared to currentMove
+                print("get position our moves")
                 posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam = True)
                 #print("its is a beginner and in our moves: "+ str(posRelative))
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
@@ -462,6 +463,8 @@ def evalBoard(board):
 
             if j in opponentMoves and currMoveBeginner:
                 # get further investigations find where it is compared to currentMove
+                print("get position opponent's moves")
+
                 posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam = False)
                 #print("its is a beginner and in our moves: "+ str(posRelative))
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
