@@ -8,11 +8,14 @@ import shutil
 import copy
 import os.path
 from os import path
+from operator import itemgetter
 
 move_file_name = "move_file"
 
-def makeGameTree(whatTurn, all_moves):
-    team = 'pandas.py'
+def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
+    #our team name
+    ourTeamName = 'pandas.py'
+            
 
     #get oponent's last move and add it to array of moves
     #if len(all_moves) >= 3:
@@ -20,15 +23,29 @@ def makeGameTree(whatTurn, all_moves):
     if lastMove not in all_moves:
         print(lastMove)
         all_moves.append(lastMove)
+
+        #get opponent team name depending on condition
+        if whatTurn == 0 and len(all_moves) != 0:
+        
+            line_parts = all_moves[0].split()
+            # actual opponent's name
+            oppTeamName = line_parts[0]
+            #print("oppTeamName is " + oppTeamName)
+        if whatTurn == 2  and oppTeamName  == 'None':
+            line_parts = ''
+
+            if len(all_moves) == 1:
+                line_parts = all_moves[0].split()
+            else:
+                line_parts = all_moves[1].split()
+            # could be the actual opponent's name or 'None'
+            oppTeamName = line_parts[0]
+            #print("corrected oppTeamName is " + oppTeamName)
+
         if whatTurn == 2: #check opponent hasn't overwritten your turn after second turn
             if all_moves[0][-3:] == all_moves[1][-3:]:
                 all_moves.pop(0)
-            
-        print("all moves:")
-        print(all_moves)
 
-    
-   
 
     print("all moves:")
     print(all_moves)
@@ -66,8 +83,16 @@ def makeGameTree(whatTurn, all_moves):
         #                 level.append(board)
         #print(level)
 
-        #with level get the utlity value for each board in level
-        evalBoard(all_moves)
+        #using current board get a list of next possible moves
+        nextPossibleMoves = evalBoard(all_moves)
+        nextPossibleMoves = sorted(nextPossibleMoves, key=itemgetter(1))
+        nextPossibleMoves.reverse()
+
+        print("ordered possible moves " + str(nextPossibleMoves))
+
+
+        #using list of next possible moves, sort by highest utlity, and then investigate that board as our opponent
+        #at this point do depth first mini-max search
 
         #randomly choosing which move for now
         #getting last board in the level and taking out the move to be added
@@ -92,7 +117,7 @@ def makeGameTree(whatTurn, all_moves):
             time.sleep(1)
         if os.path.isfile('pandas.py.go'):  
             if not path.exists('end_game'): #team file exists and end game does not
-                makeGameTree(whatTurn, all_moves)
+                makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName)
             if path.exists('end_game'):
                 print("ending")
                 sys.exit()
@@ -214,6 +239,7 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
     # switch depending on whos turn it is
     if ourTurn:
         if len(ourMoves) == 0:
+        
             moves = 0
             oppMoves = oppMoves
         else:
@@ -364,7 +390,7 @@ def evalBoard(board):
         print("our current move is" + str(currentMove))
         surroundings = getSurr(currentMove)
         emptyCheckOur = []
-        emptyCheckOpp = []
+        
 
         # returns true if finds a beginner node
         for j in surroundings:
@@ -399,6 +425,8 @@ def evalBoard(board):
                 sendUtilityOur.append(currentArray) 
         
     for i in range(len(opponentMoves)): 
+        emptyCheckOpp = []
+
         currentMove = opponentMoves[i]
         print("opp current move is" + str(currentMove))
         surroundings = getSurr(currentMove)
@@ -854,7 +882,7 @@ if __name__ == "__main__":
         if not path.exists('end_game'): #team file exists and end game does not
             whatTurn = 0
             all_moves = []
-            makeGameTree(whatTurn, all_moves)
+            makeGameTree(whatTurn, all_moves, 'pandas.py', 'None')
         if path.exists('end_game'):
             print("ending")
             sys.exit()

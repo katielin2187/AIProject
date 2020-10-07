@@ -8,11 +8,14 @@ import shutil
 import copy
 import os.path
 from os import path
+from operator import itemgetter
 
 move_file_name = "move_file"
 
-def makeGameTree(whatTurn, all_moves):
-    team = 'cats.py'
+def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
+    #our team name
+    ourTeamName = 'cats.py'
+            
 
     #get oponent's last move and add it to array of moves
     #if len(all_moves) >= 3:
@@ -20,15 +23,29 @@ def makeGameTree(whatTurn, all_moves):
     if lastMove not in all_moves:
         print(lastMove)
         all_moves.append(lastMove)
+
+        #get opponent team name depending on condition
+        if whatTurn == 0 and len(all_moves) != 0:
+        
+            line_parts = all_moves[0].split()
+            # actual opponent's name
+            oppTeamName = line_parts[0]
+            #print("oppTeamName is " + oppTeamName)
+        if whatTurn == 2  and oppTeamName  == 'None':
+            line_parts = ''
+
+            if len(all_moves) == 1:
+                line_parts = all_moves[0].split()
+            else:
+                line_parts = all_moves[1].split()
+            # could be the actual opponent's name or 'None'
+            oppTeamName = line_parts[0]
+            #print("corrected oppTeamName is " + oppTeamName)
+
         if whatTurn == 2: #check opponent hasn't overwritten your turn after second turn
             if all_moves[0][-3:] == all_moves[1][-3:]:
                 all_moves.pop(0)
-            
-        print("all moves:")
-        print(all_moves)
 
-    
-   
 
     print("all moves:")
     print(all_moves)
@@ -66,8 +83,16 @@ def makeGameTree(whatTurn, all_moves):
         #                 level.append(board)
         #print(level)
 
-        #with level get the utlity value for each board in level
-        evalBoard(all_moves)
+        #using current board get a list of next possible moves
+        nextPossibleMoves = evalBoard(all_moves)
+        nextPossibleMoves = sorted(nextPossibleMoves, key=itemgetter(1))
+        nextPossibleMoves.reverse()
+
+        print("ordered possible moves " + str(nextPossibleMoves))
+
+
+        #using list of next possible moves, sort by highest utlity, and then investigate that board as our opponent
+        #at this point do depth first mini-max search
 
         #randomly choosing which move for now
         #getting last board in the level and taking out the move to be added
@@ -92,7 +117,7 @@ def makeGameTree(whatTurn, all_moves):
             time.sleep(1)
         if os.path.isfile('cats.py.go'):  
             if not path.exists('end_game'): #team file exists and end game does not
-                makeGameTree(whatTurn, all_moves)
+                makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName)
             if path.exists('end_game'):
                 print("ending")
                 sys.exit()
@@ -177,6 +202,11 @@ def getMove(line, move_file="move_file"):
 def sendUtility(ourMoves, oppMoves, ourTurn):
     # if our turn is true : opptimality is ours
     # else optimality other team
+
+    print('send utility our team')
+    print(ourMoves)
+    print('send utility opponent')
+    print(oppMoves)
                    
     '''
     winning => 10
@@ -209,6 +239,7 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
     # switch depending on whos turn it is
     if ourTurn:
         if len(ourMoves) == 0:
+        
             moves = 0
             oppMoves = oppMoves
         else:
@@ -339,7 +370,7 @@ def evalBoard(board):
     else:
         ourTurn = True
 
-    print("ourTurn is :" + str(ourTurn))
+    print("ourTurn is:" + str(ourTurn))
     for i in range(len(board)):
         position = [board[i][-3],board[i][-1]]
         # [column, row]
@@ -358,13 +389,12 @@ def evalBoard(board):
         currentMove = ourMoves[i]
         print("our current move is" + str(currentMove))
         surroundings = getSurr(currentMove)
-        print(" the surrounding spots: " + str(surroundings))
-
+        emptyCheckOur = []
+        
 
         # returns true if finds a beginner node
         for j in surroundings:
             currMoveBeginner = isBeginner(currentMove,j, board, ourMoves, opponentMoves, ourTurn)
-            print("is it a beginner: " + str(currMoveBeginner))
 
             if j in ourMoves and currMoveBeginner:
                 # get further investigations find where it is compared to currentMove
@@ -386,11 +416,17 @@ def evalBoard(board):
                 currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
                 emptyCounter = emptyCounter + 1
                 # idk if we'll need counter yet
-                print("This is the current Array" + str(currentArray))
+                print("This is the current empty ours" + str(currentArray))
+                temp = whereSurrMove(currentMove, j)
+                print("where is surrounding" + str(temp))
 
-                sendUtilityOur.append(currentArray)
+            if emptySpaces not in emptyCheckOur and emptySpaces.reverse() not in emptyCheckOur:
+                emptyCheckOur.append(emptySpaces)
+                sendUtilityOur.append(currentArray) 
         
     for i in range(len(opponentMoves)): 
+        emptyCheckOpp = []
+        
         currentMove = opponentMoves[i]
         print("opp current move is" + str(currentMove))
         surroundings = getSurr(currentMove)
@@ -421,8 +457,13 @@ def evalBoard(board):
                 currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
                 emptyCounter = emptyCounter + 1
                 # idk if we'll need counter yet
-                print("This is the current Array" + str(currentArray))
+                print("This is the current empty opp" + str(currentArray))
 
+                temp = whereSurrMove(currentMove, j)
+                print("where is surrounding " + str(temp))
+
+            if emptySpaces not in emptyCheckOpp and emptySpaces.reverse() not in emptyCheckOpp:
+                emptyCheckOpp.append(emptySpaces)
                 sendUtilityOpponent.append(currentArray) 
 
     return sendUtility(sendUtilityOur, sendUtilityOpponent, ourTurn)
@@ -449,7 +490,7 @@ def checkEmptyBothSides(move, emptyMove, ourMoves, opponentMoves):
     elif whereSurrMove(move, emptyMove) == 'top' and isEmpty([str(currCol), str(currRow + 1)], ourMoves, opponentMoves) :
         empties = [emptyMove, [str(currCol), str(currRow + 1)]]
     elif whereSurrMove(move, emptyMove) == 'bottom' and isEmpty([str(currCol), str(currRow - 1)], ourMoves, opponentMoves) :
-        empties = [emptyMove, [str(currCol), str(currRow + 1)]]
+        empties = [emptyMove, [str(currCol), str(currRow - 1)]]
     elif whereSurrMove(move, emptyMove) == 'left' and isEmpty([str(currCol + 1), str(currRow)], ourMoves, opponentMoves) :
         empties = [emptyMove, [str(currCol + 1), str(currRow)]]
     elif whereSurrMove(move, emptyMove) == 'right' and isEmpty([str(currCol - 1), str(currRow)], ourMoves, opponentMoves) :
@@ -645,6 +686,7 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, counter
         # if top right: surrCol - currCol > 0 and surrRow - currRow < 0
         if whereSurrMove(currentMove, surrMove) == 'top right':
             # check empty bottom left if counter == 2
+            print('top RIGHTTTTTT')
             currentMove = surrMove
             surrMove = [str(surrRow - 1), str(surrCol + 1)]
             if ((ourTeam and surrMove in ourMoves) or (not ourTeam and surrMove in opponentMoves)):
@@ -840,7 +882,7 @@ if __name__ == "__main__":
         if not path.exists('end_game'): #team file exists and end game does not
             whatTurn = 0
             all_moves = []
-            makeGameTree(whatTurn, all_moves)
+            makeGameTree(whatTurn, all_moves, 'cats.py', 'None')
         if path.exists('end_game'):
             print("ending")
             sys.exit()
