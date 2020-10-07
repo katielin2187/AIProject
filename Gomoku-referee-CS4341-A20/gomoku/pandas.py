@@ -68,27 +68,39 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
     else:
         print("create game board")
         whatTurn +=2
-        #create game board
-        # level= [] #will include the 15x15 options
-        # board= []
-        # for i in range(15):
-        #     for j in range(15):
-
-        #         move = 'pandas.py ' + str(i) + ' '+ str(j)
-        #         #print (move)
-        #         if move not in all_moves:
-        #             board = all_moves.copy()
-        #             board.append(move)
-        #             if board not in level:
-        #                 level.append(board)
-        #print(level)
-
+        
         #using current board get a list of next possible moves
         nextPossibleMoves = evalBoard(all_moves)
         nextPossibleMoves = sorted(nextPossibleMoves, key=itemgetter(1))
         nextPossibleMoves.reverse()
 
         print("ordered possible moves " + str(nextPossibleMoves))
+
+
+        #create game boards
+        level= [] #will include the possible next moves in board form 
+        board= []
+        #index = 0
+        for move in nextPossibleMoves:
+            #print(move[0][0])
+            #print(move[0][1])
+            
+            move = ourTeamName + ' '+ str(move[0][0]) + ' '+ str(move[0][1])
+            #print ("possible move is " + move)
+            
+            board = all_moves.copy()
+            board.append(move)
+
+            #send board to eval board as opp
+            #next = evalBoard(board)
+            # with those next possible moves call choose the min
+            # send min value back to maximizer
+
+            if board not in level:
+                level.append(board)
+
+
+        print(level)
 
 
         #using list of next possible moves, sort by highest utlity, and then investigate that board as our opponent
