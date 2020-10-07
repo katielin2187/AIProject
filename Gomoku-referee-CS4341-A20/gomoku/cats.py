@@ -249,11 +249,13 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
     opponent = []
     
     # switch depending on whos turn it is
+    print("ourTurn is " + str(ourTurn))
     if ourTurn:
         if len(ourMoves) == 0:
         
-            moves = 0
-            oppMoves = oppMoves
+            moves = []
+            opponent = oppMoves
+            #print("oppMoves is " + str(oppMoves))
         else:
             moves = ourMoves
             opponent = oppMoves
@@ -261,15 +263,15 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
         moves = oppMoves
         opponent = ourMoves
 
-    if moves != 0:
+    if len(moves) != 0:
         for move in moves:
             numRow = move[4]
             empties = move[5]
-            print("number of moves in a row: ")
-            print(numRow)
+            #print("number of moves in a row: ")
+            #print(numRow)
             for empty in empties:
-                print("these are empty locations: ")
-                print(empty)
+                #print("these are empty locations: ")
+                #print(empty)
                 utility = 0
                 if numRow == 4:
                     utility += winning
@@ -280,11 +282,11 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
                 elif numRow == 1:
                     utility += making2
                 
-                print("Utility so far is :" + str(utility))
+                #print("Utility so far is :" + str(utility))
 
                 for oppMove in opponent:
                     if empty in oppMove[5]:
-                        print("this empty space is also in opponents empty spaces")
+                        #print("this empty space is also in opponents empty spaces")
                         oppNumRow = oppMove[4]
                         if oppNumRow == 4:
                             utility += blocking5
@@ -295,22 +297,23 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
                         elif oppNumRow == 1:
                             utility += blocking2
                         
-                        print("updated Utility: " + str(utility))
+                        #print("updated Utility: " + str(utility))
                         #pop this empty space so it isnt counted twice
-                        print(oppMove[5])
+                        #print(oppMove[5])
                         
                         oppMove[5].remove(empty)
 
                 temp = [empty, utility]
                 moveUtility.append(temp)
+
     for opp in opponent:
         numRow = opp[4]
         empties = opp[5]
-        print("number of moves in a row: ")
-        print(numRow)
+        #print("number of moves in a row: ")
+        #print(numRow)
         for empty in empties:
-            print("these are empty locations: ")
-            print(empty)
+            #print("these are empty locations: ")
+            #print(empty)
 
             utility = 0
             if numRow == 4:
@@ -322,13 +325,14 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
             elif numRow == 1:
                 utility += blocking2
 
-            print("Utility of blocking :" + str(utility))
+            #print("Utility of blocking :" + str(utility))
 
             temp = [empty, utility]
             moveUtility.append(temp)
     
     print("All the possible moves and thier utility values: ")
     print(moveUtility)
+    print()
 
     return moveUtility
 
@@ -382,24 +386,24 @@ def evalBoard(board):
     else:
         ourTurn = True
 
-    print("ourTurn is:" + str(ourTurn))
+    #print("ourTurn is:" + str(ourTurn))
     for i in range(len(board)):
         position = [board[i][-3],board[i][-1]]
         # [column, row]
-        print("position is: " + str(position))
+        #print("position is: " + str(position))
 
         #add the position to our array or oponents array depending on whos move it is
         if 'cats' in board[i]:
             ourMoves.append(position)
         else:
             opponentMoves.append(position)
-    print("ourMoves are: " + str(ourMoves))
-    print("oppMoves are: " + str(opponentMoves))
+    #print("ourMoves are: " + str(ourMoves))
+    #print("oppMoves are: " + str(opponentMoves))
 
 
     for i in range(len(ourMoves)): 
         currentMove = ourMoves[i]
-        print("our current move is" + str(currentMove))
+        #print("our current move is" + str(currentMove))
         surroundings = getSurr(currentMove)
         emptyCheckOur = []
         
@@ -411,7 +415,7 @@ def evalBoard(board):
             if j in ourMoves and currMoveBeginner:
                 # get further investigations find where it is compared to currentMove
                 posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam = True)
-                print("its is a beginner and in our moves: "+ str(posRelative))
+                #print("its is a beginner and in our moves: "+ str(posRelative))
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
                 # in a row, array of empty that continues row]
                 endingPositon = posRelative[0]
@@ -419,18 +423,18 @@ def evalBoard(board):
                 emptySpaces = posRelative[2]
                 currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
 
-                print("This is the current Array" + str(currentArray))
+                #print("This is the current Array" + str(currentArray))
                 sendUtilityOur.append(currentArray) 
             elif isEmpty(j, ourMoves, opponentMoves) and currMoveBeginner:
                 # when move is single and nothing surrounding
-                print("its is a beginner but not in moves: ")
+                #print("its is a beginner but not in moves: ")
                 emptySpaces = checkEmptyBothSides(currentMove, j, ourMoves, opponentMoves)
                 currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
                 emptyCounter = emptyCounter + 1
                 # idk if we'll need counter yet
-                print("This is the current empty ours" + str(currentArray))
+                #print("This is the current empty ours" + str(currentArray))
                 temp = whereSurrMove(currentMove, j)
-                print("where is surrounding" + str(temp))
+                #print("where is surrounding" + str(temp))
 
             if emptySpaces not in emptyCheckOur and emptySpaces.reverse() not in emptyCheckOur:
                 emptyCheckOur.append(emptySpaces)
@@ -440,39 +444,39 @@ def evalBoard(board):
         emptyCheckOpp = []
 
         currentMove = opponentMoves[i]
-        print("opp current move is" + str(currentMove))
+        #print("opp current move is" + str(currentMove))
         surroundings = getSurr(currentMove)
-        print(" the surrounding spots: " + str(surroundings))
+        #print(" the surrounding spots: " + str(surroundings))
 
         # # returns true if finds a beginner node
         for j in surroundings:
             currMoveBeginner = isBeginner(currentMove,j, board, ourMoves, opponentMoves, ourTurn)
-            print("is it a beginner: " + str(currMoveBeginner))
+            #print("is it a beginner: " + str(currMoveBeginner))
 
             if j in opponentMoves and currMoveBeginner:
                 # get further investigations find where it is compared to currentMove
                 posRelative = getPosition(currentMove, j, ourMoves, opponentMoves, ourTeam = False)
-                print("its is a beginner and in our moves: "+ str(posRelative))
+                #print("its is a beginner and in our moves: "+ str(posRelative))
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
                 # in a row, array of empty that continues row]
                 endingPositon = posRelative[0]
                 numRow = posRelative[1]
                 emptySpaces = posRelative[2]
                 currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
-                print("This is the current Array" + str(currentArray))
+                #print("This is the current Array" + str(currentArray))
 
                 sendUtilityOpponent.append(currentArray)
             elif isEmpty(j, ourMoves, opponentMoves) and currMoveBeginner:
-                print("its is a beginner but not in moves: ")
+                #print("its is a beginner but not in moves: ")
                 # when move is single and nothing surrounding
                 emptySpaces = checkEmptyBothSides(currentMove, j, ourMoves, opponentMoves)
                 currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
                 emptyCounter = emptyCounter + 1
                 # idk if we'll need counter yet
-                print("This is the current empty opp" + str(currentArray))
+                #print("This is the current empty opp" + str(currentArray))
 
                 temp = whereSurrMove(currentMove, j)
-                print("where is surrounding " + str(temp))
+                #print("where is surrounding " + str(temp))
 
             if emptySpaces not in emptyCheckOpp and emptySpaces.reverse() not in emptyCheckOpp:
                 emptyCheckOpp.append(emptySpaces)
