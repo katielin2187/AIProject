@@ -80,6 +80,7 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
         #create game boards
         level= [] #will include the possible next moves in board form 
         board= []
+        mins = []
         #index = 0
         for move in nextPossibleMoves:
             #print(move[0][0])
@@ -92,15 +93,20 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
             board.append(move)
 
             #send board to eval board as opp
-            #next = evalBoard(board)
+            nextB = evalBoard(board)
+
             # with those next possible moves call choose the min
-            # send min value back to maximizer
+            nextB = sorted(nextB, key=itemgetter(1))
+            currentMin = nextB[0]
 
-            if board not in level:
-                level.append(board)
+            temp = [currentMin, move]
 
+            mins.append(temp)
 
-        print(level)
+        mins = sorted(mins, key=itemgetter(1))
+        mins.reverse()
+        print()
+        print("mins is: " + str(mins))
 
 
         #using list of next possible moves, sort by highest utlity, and then investigate that board as our opponent
@@ -110,7 +116,8 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
         #getting last board in the level and taking out the move to be added
         
         
-        line = 'cats.py 6 7'
+        line = str(mins[0][1]) 
+        print("next move is : " + str(mins[0][1]) )
         line = getLetterNumberMove(line)
 
     #add move to array 
@@ -803,7 +810,8 @@ def checkEmpties(startingMove, endingMove, ourMoves, opponentMoves):
             emptyMove = [colStart, str(bottomMove + 1)]
             if emptyMove not in ourMoves and emptyMove not in opponentMoves:
                 empty.append(emptyMove)
-        if rightMove - 1 >= 0:
+        #before it said rightMove but was causing error, im assuming you meant topMove
+        if topMove - 1 >= 0:
             emptyMove = [colStart, str(topMove - 1)]
             if emptyMove not in ourMoves and emptyMove not in opponentMoves:
                 empty.append(emptyMove)
