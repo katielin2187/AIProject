@@ -80,6 +80,8 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
             all_moves.pop(0) # gets rid of the previous 7 7 position since we don't want two things in the same spot
         whatTurn +=2
     else:
+
+        '''
         print("create game board")
         whatTurn +=2
         
@@ -142,10 +144,48 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
 
         #randomly choosing which move for now
         #getting last board in the level and taking out the move to be added
+        '''
+        # start her code
+        print("create game board")
+        whatTurn +=2
         
+        nextPossibleMoves = evalBoard(all_moves)
+        nextPossibleMoves = sorted(nextPossibleMoves, key=itemgetter(1))
+        nextPossibleMoves.reverse()
+        print("ordered possible moves " + str(nextPossibleMoves))
+
+        values = nextPossibleMoves
+        maximizingPlayer = ourTeamName
+        depth = 0
+        #create game boards
+        listBoard= [] #will include the possible next moves in board form 
+        board= []
+        mins = []
+        #index = 0
+
+        for move in nextPossibleMoves:
+            numberMove = str(move[0][0]) + ' '+ str(move[0][1])
+            nextMove = ourTeamName + ' '+ str(move[0][0]) + ' '+ str(move[0][1])
+            #print("possible move is " + numberMove)
+            board = all_moves.copy()
+            #print()
+            #print("this is board before adding possible next move: "+ str(board))
+
+            if checkInBoard(numberMove, board): 
+                print("not in board")
+                print()
+                board.append(nextMove)
+                listBoard.append(board)
+        utilityIndex = minimax(listBoard)
+        print("util index: " + str(utilityIndex))
+        nextMoveBoard = nextPossibleMoves[utilityIndex-1]
+        print(nextMoveBoard)
+
+
+        #end her code
         
-        line = str(mins[0][1]) 
-        print("next move is : " + str(mins[0][1]) )
+        line =  ourTeamName + ' ' + nextMoveBoard[0][0] + ' ' + nextMoveBoard[0][1]
+        print("next move is : " + line)
         line = getLetterNumberMove(line)
 
     #add move to array 
@@ -168,12 +208,35 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
             if path.exists('end_game'):
                 print("ending")
                 sys.exit()
-'''
-utility function is the higher the options left the lower the cost
-- how many empty spaces around player
-- how many of your pieces you have and location of pieces that match winning position
-- position and amount of opponent player (how close is it to winning )
-'''
+
+def minimax(listBoard, node = 0, depth = 0, maximizingPlayer = True, alpha = -1000, beta = 1000):
+    #Set the terminating condition to a depth of the passed in limit
+    if depth == 1:
+        return listBoard[node]
+    
+    if maximizingPlayer :
+        bestVal = -1000 
+        for i in range(0, len(listBoard)) :
+            value = minimax(evalBoard(listBoard[i]), node + 1, depth+1, False, alpha, beta)
+            bestVal = max( bestVal, value[1]) 
+            alpha = max( alpha, bestVal)
+            print("value maximizer: " + str(value) + " value[1] maximizer: " + str(value[1]))
+            if beta <= alpha:
+                break
+        return bestVal
+
+    else :
+        bestVal = 1000 
+        for i in range(0, len(listBoard)):
+            
+            value = minimax(evalBoard(listBoard[i]), node + 1, depth+1, True, alpha, beta)
+            bestVal = min( bestVal, value[1]) 
+            beta = min( beta, bestVal)
+            print("value mini: " + value + " value[1] mini: " + value[1])
+            if beta <= alpha:
+                break
+        return bestVal
+
 def checkInBoard(numberMove, board):
     for line in board:
         line_parts = line.split()
@@ -561,7 +624,6 @@ def checkEmptyBothSides(move, emptyMove, ourMoves, opponentMoves):
 
 
 def whereSurrMove(currentMove, surrMove):
-
     currCol = int(currentMove[0])
     currRow = int(currentMove[1])
     surrCol = int(surrMove[0])
