@@ -16,12 +16,11 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
     #our team name
     ourTeamName = 'pandas.py'
             
-
     #get oponent's last move and add it to array of moves
     #if len(all_moves) >= 3:
     lastMove = readMoveFile()
     if lastMove not in all_moves:
-        print(lastMove)
+        #print(lastMove)
         all_moves.append(lastMove)
 
         #get opponent team name depending on condition
@@ -30,7 +29,7 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
             line_parts = all_moves[0].split()
             # actual opponent's name
             oppTeamName = line_parts[0]
-            #print("oppTeamName is " + oppTeamName)
+            ##print("oppTeamName is " + oppTeamName)
         if whatTurn == 2  and oppTeamName  == 'None':
             line_parts = ''
             line_parts1 = ''
@@ -43,7 +42,7 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
                 line_parts1 = all_moves[0].split()
             # could be the actual opponent's name or 'None'
             oppTeamName = line_parts[0]
-            #print("corrected oppTeamName is " + oppTeamName)
+            ##print("corrected oppTeamName is " + oppTeamName)
 
         if whatTurn == 2: #check opponent hasn't overwritten your turn after second turn
             line_parts = ''
@@ -60,8 +59,8 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
                 all_moves.pop(0)
 
 
-    print("all moves:")
-    print(all_moves)
+    #print("all moves:")
+    #print(all_moves)
     #make board from previous moves
 
     #if first move choose middle of board
@@ -70,7 +69,7 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
         line = 'pandas.py H 8'
         whatTurn += 2
     elif len(all_moves) == 1 and whatTurn == 0: #if it's your first move but you're the second player
-        print("overwriting first play")
+        #print("overwriting first play")
         line = 'pandas.py H 8'
 
         line_parts = line.split()
@@ -80,79 +79,16 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
             all_moves.pop(0) # gets rid of the previous 7 7 position since we don't want two things in the same spot
         whatTurn +=2
     else:
-
-        '''
-        print("create game board")
-        whatTurn +=2
-        
-        #using current board get a list of next possible moves
-        nextPossibleMoves = evalBoard(all_moves)
-        nextPossibleMoves = sorted(nextPossibleMoves, key=itemgetter(1))
-        nextPossibleMoves.reverse()
-
-        print("ordered possible moves " + str(nextPossibleMoves))
-        print()
-
-
-        #create game boards
-        level= [] #will include the possible next moves in board form 
-        board= []
-        mins = []
-        #index = 0
-        for move in nextPossibleMoves:
-            #print(move[0][0])
-            #print(move[0][1])
-            numberMove = str(move[0][0]) + ' '+ str(move[0][1])
-
-            nextMove = ourTeamName + ' '+ str(move[0][0]) + ' '+ str(move[0][1])
-            #print("possible move is " + numberMove)
-            
-            board = all_moves.copy()
-            
-            #print()
-            #print("this is board before adding possible next move: "+ str(board))
-
-
-            if checkInBoard(numberMove, board): 
-                print("not in board")
-                print()
-                board.append(nextMove)
-
-                #send board to eval board as opp
-                nextB = evalBoard(board)
-
-                # with those next possible moves call choose the min
-                nextB = sorted(nextB, key=itemgetter(1))
-                currentMin = nextB[0]
-
-                temp = [currentMin, nextMove]
-                print()
-                print("minimum utility for level is : " + str(temp))
-
-                mins.append(temp)
-
-        mins = sorted(mins, key=itemgetter(1))
-        mins.reverse()
-
-        print()
-        print("mins is: " + str(mins))
-        print()
-
-
-        #using list of next possible moves, sort by highest utlity, and then investigate that board as our opponent
-        #at this point do depth first mini-max search
-
-        #randomly choosing which move for now
-        #getting last board in the level and taking out the move to be added
-        '''
         # start her code
-        print("create game board")
+        #print("create game board")
         whatTurn +=2
-        
-        nextPossibleMoves = evalBoard(all_moves)
+        temp = [all_moves,0]
+        nextPossibleMoves = evalBoard(temp, ourTeamName, oppTeamName)
+        #print("next poss moves")
+        #print(nextPossibleMoves)
         nextPossibleMoves = sorted(nextPossibleMoves, key=itemgetter(1))
         nextPossibleMoves.reverse()
-        print("ordered possible moves " + str(nextPossibleMoves))
+        #print("ordered possible moves " + str(nextPossibleMoves))
 
         values = nextPossibleMoves
         maximizingPlayer = ourTeamName
@@ -162,38 +98,26 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
         board= []
         mins = []
         #index = 0
-
-        for move in nextPossibleMoves:
-            numberMove = str(move[0][0]) + ' '+ str(move[0][1])
-            nextMove = ourTeamName + ' '+ str(move[0][0]) + ' '+ str(move[0][1])
-            #print("possible move is " + numberMove)
-            board = all_moves.copy()
-            #print()
-            #print("this is board before adding possible next move: "+ str(board))
-
-            if checkInBoard(numberMove, board): 
-                print("not in board")
-                print()
-                board.append(nextMove)
-                listBoard.append(board)
-        utilityIndex = minimax(listBoard)
-        print("util index: " + str(utilityIndex))
-        nextMoveBoard = nextPossibleMoves[utilityIndex-1]
-        print(nextMoveBoard)
+            
+        utilityIndex = minimax(nextPossibleMoves, oppTeamName, ourTeamName)
+        #print("util index: " + str(utilityIndex))
+        #print("next poss utility" + str(nextPossibleMoves[utilityIndex]))
+        nextMoveBoard = nextPossibleMoves[utilityIndex][0]
+        
 
 
         #end her code
         
-        line =  ourTeamName + ' ' + nextMoveBoard[0][0] + ' ' + nextMoveBoard[0][1]
-        print("next move is : " + line)
+        line =  nextMoveBoard[len(nextMoveBoard) - 1]
+        #print("next move is : " + line)
         line = getLetterNumberMove(line)
 
     #add move to array 
     
     all_moves.append(getMove(line))
 
-    print("all moves 2:")
-    print(all_moves)
+    #print("all moves 2:")
+    #print(all_moves)
 
     #write move to file 
     writeMoveFile(line)
@@ -206,21 +130,24 @@ def makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName):
             if not path.exists('end_game'): #team file exists and end game does not
                 makeGameTree(whatTurn, all_moves, ourTeamName, oppTeamName)
             if path.exists('end_game'):
-                print("ending")
+                #print("ending")
                 sys.exit()
 
-def minimax(listBoard, node = 0, depth = 0, maximizingPlayer = True, alpha = -1000, beta = 1000):
+def minimax(listBoard, ourTeamName, oppTeamName, index = 0, node = 0, depth = 0, maximizingPlayer = False, alpha = -1000, beta = 1000):
     #Set the terminating condition to a depth of the passed in limit
     if depth == 1:
+        #print("list board testing" + str(listBoard[node]) + "node is : " + str(node))
+        #print("value" + str(listBoard[node][1]))
         return listBoard[node]
     
     if maximizingPlayer :
         bestVal = -1000 
         for i in range(0, len(listBoard)) :
-            value = minimax(evalBoard(listBoard[i]), node + 1, depth+1, False, alpha, beta)
+            value = minimax(evalBoard(listBoard[i], oppTeamName, ourTeamName), oppTeamName, ourTeamName, i, node + 1, depth + 1, False, alpha, beta)
             bestVal = max( bestVal, value[1]) 
             alpha = max( alpha, bestVal)
-            print("value maximizer: " + str(value) + " value[1] maximizer: " + str(value[1]))
+            #print("ListBoard" + str(listBoard[i]))
+            #print("value maximizer: " + str(value) + " value[1] maximizer: " + str(value[1]) + "index: " + str(i))
             if beta <= alpha:
                 break
         return bestVal
@@ -229,24 +156,27 @@ def minimax(listBoard, node = 0, depth = 0, maximizingPlayer = True, alpha = -10
         bestVal = 1000 
         for i in range(0, len(listBoard)):
             
-            value = minimax(evalBoard(listBoard[i]), node + 1, depth+1, True, alpha, beta)
+            value = minimax(evalBoard(listBoard[i], ourTeamName, oppTeamName), ourTeamName, oppTeamName, i, node + 1, depth+1, True, alpha, beta)
             bestVal = min( bestVal, value[1]) 
             beta = min( beta, bestVal)
-            print("value mini: " + value + " value[1] mini: " + value[1])
+            #print("ListBoard" + str(listBoard[i]))
+            #print("value mini: " + str(value) + " value[1] mini: " + str(value[1]) + "index mini: " + str(i))
             if beta <= alpha:
                 break
         return bestVal
 
 def checkInBoard(numberMove, board):
     for line in board:
+        #print("line in board" + str(line))
+  
         line_parts = line.split()
         lineNum = line_parts[1] + ' ' + line_parts[2]
         if numberMove == lineNum:
             #in board
             return False
-    
     #not in board
     return True
+    
 def removeTeamGoFile():
     team_go_file = 'pandas.py.go'
     try:
@@ -318,15 +248,15 @@ def getMove(line, move_file="move_file"):
 
     return move
 
-def sendUtility(ourMoves, oppMoves, ourTurn):
+def sendUtility(ourMoves, oppMoves, board, ourTurn, ourTeamName, oppTeamName):
     # if our turn is true : opptimality is ours
     # else optimality other team
 
-    print('send utility our team')
-    print(ourMoves)
-    print('send utility opponent')
-    print(oppMoves)
-    print()
+    #print('send utility our team')
+    #print(ourMoves)
+    #print('send utility opponent')
+    #print(oppMoves)
+    #print()
                    
     '''
     winning => 10
@@ -353,9 +283,11 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
 
     moveUtility = []
 
+    listBoard = []
+    boardCopy = []
     moves = []
     opponent = []
-    
+    #print("this is board before adding possible next move: "+ str(board))
     # switch depending on whos turn it is
     if ourTurn:
         if len(ourMoves) == 0:
@@ -373,11 +305,11 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
         for move in moves:
             numRow = move[4]
             empties = move[5]
-            #print("number of moves in a row: ")
-            #print(numRow)
+            ##print("number of moves in a row: ")
+            ##print(numRow)
             for empty in empties:
-                #print("these are empty locations: ")
-                #print(empty)
+                ##print("these are empty locations: ")
+                ##print(empty)
                 utility = 0
                 if numRow == 4:
                     utility += winning
@@ -388,11 +320,11 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
                 elif numRow == 1:
                     utility += making2
                 
-                #print("Utility so far is :" + str(utility))
+                ##print("Utility so far is :" + str(utility))
 
                 for oppMove in opponent:
                     if empty in oppMove[5]:
-                       # print("this empty space is also in opponents empty spaces")
+                       # #print("this empty space is also in opponents empty spaces")
                         oppNumRow = oppMove[4]
                         if oppNumRow == 4:
                             utility += blocking5
@@ -403,9 +335,9 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
                         elif oppNumRow == 1:
                             utility += blocking2
                         
-                        #print("updated Utility: " + str(utility))
+                        ##print("updated Utility: " + str(utility))
                         #pop this empty space so it isnt counted twice
-                       # print(oppMove[5])
+                       # #print(oppMove[5])
                         
                         oppMove[5].remove(empty)
 
@@ -414,11 +346,11 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
     for opp in opponent:
         numRow = opp[4]
         empties = opp[5]
-       # print("number of moves in a row: ")
-       # print(numRow)
+       # #print("number of moves in a row: ")
+       # #print(numRow)
         for empty in empties:
-          #  print("these are empty locations: ")
-           # print(empty)
+          #  #print("these are empty locations: ")
+           # #print(empty)
 
             utility = 0
             if numRow == 4:
@@ -430,17 +362,32 @@ def sendUtility(ourMoves, oppMoves, ourTurn):
             elif numRow == 1:
                 utility += blocking2
 
-           # print("Utility of blocking :" + str(utility))
+           # #print("Utility of blocking :" + str(utility))
 
             temp = [empty, utility]
             moveUtility.append(temp)
     
-    print("All the possible moves and thier utility values: ")
-    print(moveUtility)
+    #print("All the possible moves and thier utility values: ")
+    #print(moveUtility)
 
-    return moveUtility
+    for move in moveUtility:
+        numberMove = str(move[0][0]) + ' '+ str(move[0][1])
+        #print("ourteam: " + str(ourTeamName))
+        nextMove = ourTeamName + ' '+ str(move[0][0]) + ' '+ str(move[0][1])
+        #print("possible move is " + numberMove)
+        boardCopy = board.copy()
+        #print()
 
-def evalBoard(board):
+        #print("this is board before adding possible next move: "+ str(boardCopy))
+        if checkInBoard(numberMove, boardCopy): 
+            #print("not in board")
+            #print()
+            boardCopy.append(nextMove)
+            temp = [boardCopy, move[1]]
+            listBoard.append(temp)
+    return listBoard
+
+def evalBoard(board1, ourTeamName, oppTeamName):
     '''
         go through every level in board and construct picture of opponent
         if opponent 
@@ -474,11 +421,14 @@ def evalBoard(board):
 
     #if your opponent surrounds your possible move, then append it to 
     #the array and return surrounding moves
-    print()
-    print("in the eval function")
+    #print()
+    #print("in the eval function")
     
     # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number in a row, array of empty that continues row]
-
+    board = board1[0]
+    #print("board 1: ")
+    #print(board[0])
+    #print("board regular: " + str(board1))
     ourMoves = []
     opponentMoves = []
 
@@ -488,13 +438,17 @@ def evalBoard(board):
     else:
         ourTurn = True
 
-    print("ourTurn is:" + str(ourTurn))
+    #print("ourTurn is:" + str(ourTurn))
     for i in range(len(board)):
         line = board[i]
+        #print("this is line")
+        #print(line)
+        #print("this is board")
+        #print(board)
         line_parts = line.split()
         position = [line_parts[1],line_parts[2]]
         # [column, row]
-        #print("move is: " + str(board[i]))
+        ##print("move is: " + str(board[i]))
 
         #add the position to our array or oponents array depending on whos move it is
         if ourTurn:
@@ -508,15 +462,16 @@ def evalBoard(board):
                 opponentMoves.append(position)
             else:
                 ourMoves.append(position)
-    print("ourMoves are: " + str(ourMoves))
-    print("oppMoves are: " + str(opponentMoves))
-    print()
+    #print("ourMoves are: " + str(ourMoves))
+    #print("oppMoves are: " + str(opponentMoves))
+    #print()
 
+    #print("board in eval board: " + str(board))
     sendUtilityOur = sendMovesToUtlity(ourMoves,opponentMoves, ourMoves, board, ourTurn)
-    print("got here")
+    #print("got here")
     sendUtilityOpponent = sendMovesToUtlity(ourMoves,opponentMoves, opponentMoves, board, ourTurn)
 
-    return sendUtility(sendUtilityOur, sendUtilityOpponent, ourTurn)
+    return sendUtility(sendUtilityOur, sendUtilityOpponent, board, ourTurn, ourTeamName, oppTeamName)
     # send this to a utlity function which will return same array but with first value filled in 
     # sort array by that value depending on whether or not it is our turn 
     # add position to board that this function returns or make copy of a "fake" board and keep going 
@@ -537,24 +492,24 @@ def sendMovesToUtlity(ourMoves,opponentMoves, moves, board, ourTurn):
 
     for i in range(len(moves)): 
         currentMove = moves[i]
-        #print("our current move is cat" + str(currentMove))
+        ##print("our current move is cat" + str(currentMove))
         surroundings = getSurr(currentMove)
-        #print("surroungs pandas: " + str(surroundings))
+        ##print("surroungs pandas: " + str(surroundings))
         emptyCheck = []
         
 
         # returns true if finds a beginner node
         for j in surroundings:
             currMoveBeginner = isBeginner(currentMove,j, board, moves, opponentMoves, ourTurn)
-            #print("j is: " + str(j))
+            ##print("j is: " + str(j))
 
             if j in moves and currMoveBeginner and j not in opponent:
-                #print("is next to own team")
-                print("j is: " + str(j) + " current move is : " + str(currentMove))
+                ##print("is next to own team")
+                #print("j is: " + str(j) + " current move is : " + str(currentMove))
 
                 # get further investigations find where it is compared to currentMove
                 posRelative = getPosition(currentMove, j, moves, opponentMoves, ourTurn)
-                #print("its is a beginner and in our moves: "+ str(posRelative))
+                ##print("its is a beginner and in our moves: "+ str(posRelative))
                 # = [utility = 0 until evaluated, ourTeam = t/f, first pos, last pos, number 
                 # in a row, array of empty that continues row]
                 endingPositon = posRelative[0]
@@ -565,24 +520,24 @@ def sendMovesToUtlity(ourMoves,opponentMoves, moves, board, ourTurn):
                     if k in board:
                         emptySpaces.remove(k)
                 
-                print("surrounding is : " + str(whereSurrMove(currentMove, j)))
-                print("new empty spaces " + str(emptySpaces))
+                #print("surrounding is : " + str(whereSurrMove(currentMove, j)))
+                #print("new empty spaces " + str(emptySpaces))
 
                 currentArray = [0, ourTurn, currentMove, endingPositon, numRow, emptySpaces] 
 
-                #print("This is the current Array" + str(currentArray))
+                ##print("This is the current Array" + str(currentArray))
                 sendUtility.append(currentArray) 
             elif isEmpty(j, moves, opponentMoves) and currMoveBeginner:
-                #print("is empty and curr is true")
+                ##print("is empty and curr is true")
                 # when move is single and nothing surrounding
-                #print("its is a beginner but not in moves: ")
+                ##print("its is a beginner but not in moves: ")
                 emptySpaces = checkEmptyBothSides(currentMove, j, moves, opponentMoves)
                 currentArray = [0, ourTurn, currentMove, currentMove, 1, emptySpaces]
                 emptyCounter = emptyCounter + 1
                 # idk if we'll need counter yet
-                #print("This is the current empty ours" + str(currentArray))
+                ##print("This is the current empty ours" + str(currentArray))
                 temp = whereSurrMove(currentMove, j)
-                #print("where is surrounding" + str(temp))
+                ##print("where is surrounding" + str(temp))
 
             if emptySpaces not in emptyCheck and emptySpaces.reverse() not in emptyCheck:
                 emptyCheck.append(emptySpaces)
@@ -594,31 +549,31 @@ def checkEmptyBothSides(move, emptyMove, ourMoves, opponentMoves):
     currCol = int(move[0])
     currRow = int(move[1])
     empties = [emptyMove]
-    #print('MOVES: ' + str(move) + ' ' + str(emptyMove))
-    #print('location of surr: ' + whereSurrMove(move, emptyMove))
+    ##print('MOVES: ' + str(move) + ' ' + str(emptyMove))
+    ##print('location of surr: ' + whereSurrMove(move, emptyMove))
     if whereSurrMove(move, emptyMove) == 'top right' and isEmpty([str(currCol - 1), str(currRow + 1)], ourMoves, opponentMoves) :
-       # print('top right')
+       # #print('top right')
         empties = [emptyMove, [str(currCol - 1), str(currRow + 1)]]
     elif whereSurrMove(move, emptyMove) == 'top left' and isEmpty([str(currCol + 1), str(currRow + 1)], ourMoves, opponentMoves) :
-       # print('top left')
+       # #print('top left')
         empties = [emptyMove, [str(currCol + 1), str(currRow + 1)]]
     elif whereSurrMove(move, emptyMove) == 'bottom left' and isEmpty([str(currCol + 1), str(currRow - 1)], ourMoves, opponentMoves) :
-       # print('bottom left')
+       # #print('bottom left')
         empties = [emptyMove, [str(currCol + 1), str(currRow - 1)]]
     elif whereSurrMove(move, emptyMove) == 'bottom right' and isEmpty([str(currCol - 1), str(currRow - 1)], ourMoves, opponentMoves) :
-       # print('bottom right')
+       # #print('bottom right')
         empties = [emptyMove, [str(currCol - 1), str(currRow - 1)]]
     elif whereSurrMove(move, emptyMove) == 'top' and isEmpty([str(currCol), str(currRow + 1)], ourMoves, opponentMoves) :
-       # print('top')
+       # #print('top')
         empties = [emptyMove, [str(currCol), str(currRow + 1)]]
     elif whereSurrMove(move, emptyMove) == 'bottom' and isEmpty([str(currCol), str(currRow - 1)], ourMoves, opponentMoves) :
-       # print('bottom')
+       # #print('bottom')
         empties = [emptyMove, [str(currCol), str(currRow - 1)]]
     elif whereSurrMove(move, emptyMove) == 'left' and isEmpty([str(currCol + 1), str(currRow)], ourMoves, opponentMoves) :
-       # print('left')
+       # #print('left')
         empties = [emptyMove, [str(currCol + 1), str(currRow)]]
     elif whereSurrMove(move, emptyMove) == 'right' and isEmpty([str(currCol - 1), str(currRow)], ourMoves, opponentMoves) :
-       # print('right')
+       # #print('right')
         empties = [emptyMove, [str(currCol - 1), str(currRow)]]
     return empties
 
@@ -809,7 +764,7 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, startin
     opponent = opponentMoves
     move = ourMoves
 
-    print("before loop") 
+    #print("before loop") 
 
     if counter == 2:
         startingMove = currentMove
@@ -817,27 +772,27 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, startin
         # if top right: surrCol - currCol > 0 and surrRow - currRow < 0
         if whereSurrMove(currentMove, surrMove) == 'top right':
             # check empty bottom left if counter == 2
-            print('top RIGHTTTTTT')
+            #print('top RIGHTTTTTT')
             currentMove = surrMove
-            print("current move is :" +  str(currentMove))
+            #print("current move is :" +  str(currentMove))
 
-            print("surCol and Sur row are : " + str(surrCol) + ' ' + str(surrRow))
+            #print("surCol and Sur row are : " + str(surrCol) + ' ' + str(surrRow))
 
             surrMove = [str(surrCol + 1), str(surrRow - 1)]
 
 
-            print("surrounding move is :" +  str(surrMove))
-            print("opp is : " + str(opponent) + " our turn is : " + str(ourTeam))
+            #print("surrounding move is :" +  str(surrMove))
+            #print("opp is : " + str(opponent) + " our turn is : " + str(ourTeam))
 
             if surrMove in move and surrMove not in opponent and surrMove != currentMove:
-                print("loop")
+                #print("loop")
                 getPosition(currentMove, surrMove, move, opponent, ourTeam, startingMove , counter = counter + 1)
             else:
                 loop = False
 
         # if top left: surrCol - currCol < 0 and surrRow - currRow < 0
         elif whereSurrMove(currentMove, surrMove) == 'top left':
-            print("top left")
+            #print("top left")
             currentMove = surrMove
             surrMove = [str(surrCol - 1), str(surrRow - 1)]
             if surrMove in move and surrMove not in opponent and surrMove != currentMove:
@@ -847,13 +802,13 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, startin
 
         # if bottom left: surrCol - currentMove < 0 and surrRow - currRow > 0
         elif whereSurrMove(currentMove, surrMove) == 'bottom left':
-            print("bottom left")
+            #print("bottom left")
             currentMove = surrMove
             surrMove = [str(surrCol + 1), str(surrRow - 1)]
 
-            print("current move is :" +  str(currentMove))
-            print("surrounding move is :" +  str(surrMove))
-            print("opp is : " + str(opponent) + " our turn is : " + str(ourTeam))
+            #print("current move is :" +  str(currentMove))
+            #print("surrounding move is :" +  str(surrMove))
+            #print("opp is : " + str(opponent) + " our turn is : " + str(ourTeam))
 
             if surrMove in move and surrMove not in opponent and surrMove != currentMove:
                 getPosition(currentMove, surrMove, move, opponent, ourTeam, startingMove , counter = counter + 1)
@@ -862,7 +817,7 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, startin
 
         # if bottom right: surrCol - currentMove > 0 and surrRow - currRow > 0
         elif whereSurrMove(currentMove, surrMove) == 'bottom right':
-            print(" botoom right")
+            #print(" botoom right")
             currentMove = surrMove
             surrMove = [str(surrCol + 1), str(surrRow + 1)]
             if surrMove in move and surrMove not in opponent and surrMove != currentMove:
@@ -872,7 +827,7 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, startin
                 
         # if top: surrRow - currRow < 0
         elif whereSurrMove(currentMove, surrMove) == 'top':
-            print('top')
+            #print('top')
             currentMove = surrMove
             surrMove = [str(surrCol) , str(surrRow - 1)]
             if surrMove in move and surrMove not in opponent and surrMove != currentMove:
@@ -882,7 +837,7 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, startin
                 
         # if bottom: surrRow - currRow > 0
         elif whereSurrMove(currentMove, surrMove) == 'bottom':
-            print("BOTTOM")
+            #print("BOTTOM")
             currentMove = surrMove
             surrMove = [str(surrCol) , str(surrRow + 1)]
             if surrMove in move and surrMove not in opponent and surrMove != currentMove:
@@ -892,7 +847,7 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, startin
 
         # if left: surrCol - currCol < 0 
         elif whereSurrMove(currentMove, surrMove) == 'left':
-            print('left')
+            #print('left')
             currentMove = surrMove
             surrMove = [str(surrCol - 1) , str(surrRow)]
             if surrMove in move and surrMove not in opponent and surrMove != currentMove:
@@ -902,7 +857,7 @@ def getPosition(currentMove, surrMove, ourMoves, opponentMoves, ourTeam, startin
 
         # if right: surrCol - currCol > 0 
         elif whereSurrMove(currentMove, surrMove) == 'right':
-            print('right')
+            #print('right')
             currentMove = surrMove
             surrMove = [str(surrCol + 1) , str(surrRow)]
             if surrMove in move and surrMove not in opponent and surrMove != currentMove:
@@ -997,38 +952,38 @@ def getSurr(position):
     # if top right corner
     if(column == '14' and row == '0'):
         surrounding = [['13','0'],['13','1'], ['14','1']]
-        #print("one" + str(surrounding))
+        ##print("one" + str(surrounding))
     # if bottom right corner
     elif(column == '14' and row == '14'):
         surrounding = [['14','13'],['13','13'], ['13','14']]
-        #print("two" + str(surrounding))
+        ##print("two" + str(surrounding))
     # if top left corner 
     elif(column == '0' and row == '0'):
         surrounding = [['1','0'],['1','1'], ['0','1']]
-        #print("three" + str(surrounding))
+        ##print("three" + str(surrounding))
     # if bottom left corner
     elif(column == '0' and row == '14'):
         surrounding = [['0','13'],['1','13'], ['1','14']]
-        #print("four" + str(surrounding))
+        ##print("four" + str(surrounding))
     # if top 
     elif(row == '0'):
         surrounding = [[subCol,row],[addCol,row], [subCol,addRow], [column,addRow], [addCol,addRow]]
-        #print("five" + str(surrounding))
+        ##print("five" + str(surrounding))
     # if bottom
     elif(row == '14'):
         surrounding = [[subCol,row], [subCol,subRow], [column, subRow], [addCol, subRow], [addCol, row]]
-        print("six" + str(surrounding))
+        #print("six" + str(surrounding))
     # if left 
     elif(column == '0'):
         surrounding = [[column,subRow], [addCol,subRow], [addCol, row], [addCol, addRow], [column, addRow]]
-        #print("seven" + str(surrounding))
+        ##print("seven" + str(surrounding))
     # if right 
     elif(column == '14'):
         surrounding = [[column,subRow], [subCol,subRow], [subCol, row], [subCol, addRow], [column, addRow]]
-        #print("eight" + str(surrounding))
+        ##print("eight" + str(surrounding))
     else:
         surrounding = [[column,subRow], [subCol,subRow], [subCol, row], [subCol, addRow], [column, addRow], [addCol, row], [addCol, addRow], [column, addRow]]
-        #print("nine" + str(surrounding))
+        ##print("nine" + str(surrounding))
     return surrounding
 
 
@@ -1041,5 +996,5 @@ if __name__ == "__main__":
             all_moves = []
             makeGameTree(whatTurn, all_moves, 'pandas.py', 'None')
         if path.exists('end_game'):
-            print("ending")
+            #print("ending")
             sys.exit()

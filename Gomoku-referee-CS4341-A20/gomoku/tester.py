@@ -4,7 +4,6 @@ import logging
 import time
 import os
 import random
-import sys
 
 logging.basicConfig(format='%(levelname)s:  %(message)s', level=logging.DEBUG)
 logger = logging.getLogger(__file__)
@@ -197,29 +196,29 @@ def cleanGame():
 
 if __name__ == "__main__":
     pass
-    _ = input("Press Enter to start testing...")
+    _ = raw_input("Press Enter to start testing...")
     logging.info("Checking losing traces")
     for i, trace in enumerate(getLosingTraces()):
         logging.info("Running trace %s" % (i,))
         playGame(trace)
-        _ = input("Press Enter to clean directory...")
+        _ = raw_input("Press Enter to clean directory...")
         cleanGame()
-        _ = input("Press Enter to run next trace....")
-        print("")
+        _ = raw_input("Press Enter to run next trace....")
+        print ""
     logging.info("Checking winning traces")
     for i, trace in enumerate(getWinningTraces()):
         logging.info("Running trace %s" % (i,))
         playGame(trace)
-        _ = input("Press Enter to clean directory...")
+        _ = raw_input("Press Enter to clean directory...")
         cleanGame()
-        _ = input("Press Enter to run next trace....")
-        print("")
+        _ = raw_input("Press Enter to run next trace....")
+        print ""
     logging.info("Checking tying traces")
     for i, trace in enumerate(getTieingTraces()):
         logging.info("Running trace %s" % (i,))
         playGame(trace)
-        _ = input("Press Enter to clean directory...")
+        _ = raw_input("Press Enter to clean directory...")
         cleanGame()
-        _ = input("Press Enter to run next trace....")
-        print("")
+        _ = raw_input("Press Enter to run next trace....")
+        print ""
 
